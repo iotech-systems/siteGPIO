@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<gpio>
+   <host name="omms-edge-roof">
+      <board id="gpioRoof" type="waveshare3chHat" args="mode:=bcm;" />
+   </host>
+   <host name="omms-edge-p16">
+      <board id="" type="" args="" />
+      <board id="" type="" args="" />
+   </host>
+   <host name="3cpo">
+      <boards>
+         <board id="devLab3rHat" type="waveshare3chHat" args=";mode:=bcm;" />
+         <board id="devLabLC4r" type="lctech4chModbus" args=";addr:=8;comminfo:=9600,E,8;" />
+      </boards>
+   </host>
+   <host name="omms-edge-lab">
+      <boards>
+         <board id="gpioDevLab3rHat" type="waveshare3chHat" args=";mode:=bcm;" />
+         <board id="gpioDevLabLC4r" type="lctech4chModbus" args=";addr:=8;comminfo:=9600,E,8;" />
+      </boards>
+   </host>
+</gpio>
