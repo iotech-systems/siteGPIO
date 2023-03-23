@@ -7,6 +7,7 @@ from applib.interfaces.rpiHatBoard import rpiHatBoard
 # "armv7l": on running on RPi
 if os.uname()[4].startswith("armv"):
    import RPi.GPIO as GPIO
+   GPIO.setwarnings(False)
 else:
    from sims.rpiGPIO import GPIO
 
@@ -119,6 +120,7 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
          # -- -- -- --
          pin: int = self.ch_pins[chnl]
          GPIO.output(pin, b_state)
+         print(f"OVERRIDE: {chnl} : {pin} : {b_state}")
          # -- -- -- --
       except Exception as e:
          print(e)
