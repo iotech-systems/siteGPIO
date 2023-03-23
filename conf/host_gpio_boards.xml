@@ -15,8 +15,8 @@
    </host>
    <host name="omms-edge-lab">
       <boards>
-         <board id="gpioDevLab3rHat" type="waveshare3chHat" args=";mode:=bcm;" />
-         <board id="gpioDevLabLC4r" type="lctech4chModbus" args=";addr:=8;comminfo:=9600,E,8;" />
+         <board id="devLab3rHat" type="waveshare3chHat" args=";mode:=bcm;" />
+         <board id="devLabLCE4r" type="lctech4chModbus" args=";addr:=8;comminfo:=9600,E,8;" />
       </boards>
    </host>
 </gpio>
