@@ -2,8 +2,10 @@
 import json, time, redis
 import serial, os, threading
 from applib.utils import utils
-from applib.datatypes import redisDBIdx, redisPMsg
+from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
 from applib.interfaces.rpiHatBoard import rpiHatBoard
+from applib.channelPinDriver import channelPinDriver
+from applib.sunclock import sunClock
 # "armv7l": on running on RPi
 if os.uname()[4].startswith("armv"):
    import RPi.GPIO as GPIO
@@ -20,7 +22,11 @@ else:
 """
 class waveshare3chHat(rpiHatBoard, threading.Thread):
 
-   def __init__(self, xid: str, red: redis.Redis, args: object):
+   def __init__(self, xid: str
+         , red: redis.Redis
+         , sun: sunClock
+         , args: object):
+      # -- -- -- -- -- -- --
       threading.Thread.__init__(self)
       super().__init__()
       self.id = xid
@@ -28,8 +34,9 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
       self.red: redis.Redis = red
       self.red_sub = self.red.pubsub()
       self.red_sbu_thread: threading.Thread = None
+      self.sun: sunClock = sun
       self.args = args
-      # -- -- -- -- -- -- -- --
+      # -- -- -- -- -- -- --
       self.ON_OFF_TABLE: {} = {"ON": 0, "OFF": 1}
       self.ch_pins: {} = {"C1": 26, "C2": 20, "C3": 21}
 
@@ -99,18 +106,37 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
    def __on_redis_msg__(self, msg: {}):
       pmsg: redisPMsg = redisPMsg(msg)
       if pmsg.chnl == f"{self.board_id}_GPIO_OVERRIDE":
-         self.__on_override__(pmsg)
-      elif pmsg.chnl == f"{self.board_id}_GPIO_OVERRIDE":
-         self.__on_set__(pmsg)
+         self.__update_chnl_pin__(pmsg)
+      elif pmsg.chnl == f"{self.board_id}_GPIO_CONF_CHANGE":
+         self.__update_chnl_pin__(pmsg)
       else:
+         pass
+
+   def __update_chnl_pin__(self, pmsg: redisPMsg):
+      try:
+         # -- -- -- --
+         self.red.select(redisDBIdx.DB_IDX_GPIO.value)
+         CHNL_PIN_KEY = pmsg.data.strip()
+         _hash = self.red.hgetall(CHNL_PIN_KEY)
+         red_hash: redisChnlPinHash = redisChnlPinHash(_hash)
+         chn_pin_driver: channelPinDriver = \
+            channelPinDriver(red_hash, self.sun, self.ON_OFF_TABLE["ON"])
+         # -- -- -- --
+         STATE: str = chn_pin_driver.get_state()
+         int_state: int = self.ON_OFF_TABLE[STATE]
+         GPIO.output(pin, b_state)
+         print(f"OVERRIDE: {chnl} : {pin} : {int_state}")
+      except Exception as e:
+         print(e)
+      finally:
          pass
 
    def __on_override__(self, pmsg: redisPMsg):
       try:
-         # -- -- -- --
          self.red.select(redisDBIdx.DB_IDX_GPIO.value)
-         h_all = self.red.hgetall(pmsg.data)
-         j = json.loads(h_all["OVERRIDE"])
+         CHNL_PIN_KEY = pmsg.data.strip()
+         _hash = self.red.hgetall(CHNL_PIN_KEY)
+         j = json.loads(_hash["OVERRIDE"])
          chnl = "C%s" % j["chnl"]
          # -- -- -- --
          state = str(j["state"]).upper()
@@ -136,6 +162,14 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
       self.__runtime_thread__()
 
    def __runtime_thread__(self):
+      cnt: int = 0
       while True:
-         time.sleep(2.0)
-         print(f"__thread__ : {self}")
+         try:
+            time.sleep(2.0)
+            if cnt == 10:
+               print(f"__thread__ : {self}")
+               cnt = 0
+            # -- -- -- --
+            cnt += 1
+         except Exception as e:
+            print(e)

@@ -2,6 +2,7 @@
 import threading, typing as t
 import xml.etree.ElementTree as _et
 import redis, configparser as _cp
+from applib.sunclock import sunClock
 from boards.waveshare3chHat import waveshare3chHat
 from boards.lctech4chModbus import lctech4chModbus
 
@@ -9,10 +10,12 @@ from boards.lctech4chModbus import lctech4chModbus
 class boardManager(object):
 
    def __init__(self, ini: _cp.ConfigParser
+         , sun: sunClock
          , red: redis.Redis
          , xml: _et.Element):
       # -- -- -- --
       self.ini: _cp.ConfigParser = ini
+      self.sun: sunClock = sun
       self.red: redis.Redis = red
       self.xml: _et.Element = xml
       self.board_bots: t.List[threading.Thread] = []
@@ -24,7 +27,8 @@ class boardManager(object):
          _id = e.attrib["id"]; _args = e.attrib["args"]
          _type = e.attrib["type"]
          if _type == "waveshare3chHat":
-            board: waveshare3chHat = waveshare3chHat(xid=_id, red=self.red, args=_args)
+            board: waveshare3chHat = \
+               waveshare3chHat(xid=_id, red=self.red, sun=self.sun, args=_args)
             board.init()
             return board
          elif _type == "lctech4chModbus":
