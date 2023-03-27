@@ -14,13 +14,7 @@ else:
    from sims.rpiGPIO import GPIO
 
 
-"""
-   BCM |  wPi | gpio
-   26  |  25  | GPIO.25 -> CH1
-   20  |  28  | GPIO.28 -> CH2
-   21  |  29  | GPIO.29 -> CH3
-"""
-class waveshare3chHat(rpiHatBoard, threading.Thread):
+class waveshare8chExpBoard(rpiHatBoard, threading.Thread):
 
    def __init__(self, xid: str
          , red: redis.Redis
@@ -38,7 +32,8 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
       self.args = args
       # -- -- -- -- -- -- --
       self.ON_OFF_TABLE: {} = {"ON": 0, "OFF": 1}
-      self.CHNL_PINS: {} = {"C1": 26, "C2": 20, "C3": 21}
+      self.CHNL_PINS: {} = {"C1": 5, "C2": 6, "C3": 13
+         , "C4": 16, "C5": 19, "C6": 20, "C7": 21, "C8": 26}
 
    def init(self, GPIO_MODE: int = GPIO.BCM) -> bool:
       try:
@@ -71,34 +66,9 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
          print(e)
          return False
 
-   def set_channel(self, chnl: int, val: bool):
-      super().set_channel(chnl, val)
-
-   def read_channel(self, chnl: int):
-      super().read_channel(chnl)
-
-   def set_bus_address(self, old_adr: int, new_adr: int):
-      super().set_bus_address(old_adr, new_adr)
-
-   def read_bus_address(self, old_adr: int):
-      super().read_bus_address(old_adr)
-
-   def __ser_port__(self) -> serial.Serial:
-      pass
-
-   def __send__(self, outbuff: bytearray) -> int:
-      pass
-
-   def __read__(self) -> [None, bytearray]:
-      return super().__read__()
-
-   def __str__(self):
-      return "waveshare3chHat ver: 001"
-
    # -- -- -- -- -- -- -- --
    # redis
    # -- -- -- -- -- -- -- --
-
    """
       {'type': 'pmessage', 'pattern': 'DEVLAB3RHAT*'
          , 'channel': 'DEVLAB3RHAT_GPIO_OVERRIDE', 'data': 'PIN_DEVLAB3RHAT_CH_1'}

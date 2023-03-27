@@ -4,6 +4,7 @@ import xml.etree.ElementTree as _et
 import redis, configparser as _cp
 from applib.sunclock import sunClock
 from boards.waveshare3chHat import waveshare3chHat
+from boards.waveshare8chExpBoard import waveshare8chExpBoard
 from boards.lctech4chModbus import lctech4chModbus
 
 
@@ -29,6 +30,11 @@ class boardManager(object):
          if _type == "waveshare3chHat":
             board: waveshare3chHat = \
                waveshare3chHat(xid=_id, red=self.red, sun=self.sun, args=_args)
+            board.init()
+            return board
+         elif _type == "waveshare8chExpBoard":
+            board: waveshare8chExpBoard = \
+               waveshare8chExpBoard(xid=_id, red=self.red, sun=self.sun, args=_args)
             board.init()
             return board
          elif _type == "lctech4chModbus":
