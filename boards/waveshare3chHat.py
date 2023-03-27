@@ -71,32 +71,11 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
          print(e)
          return False
 
-   def set_channel(self, chnl: int, val: bool):
-      super().set_channel(chnl, val)
-
-   def read_channel(self, chnl: int):
-      super().read_channel(chnl)
-
-   def set_bus_address(self, old_adr: int, new_adr: int):
-      super().set_bus_address(old_adr, new_adr)
-
-   def read_bus_address(self, old_adr: int):
-      super().read_bus_address(old_adr)
-
-   def __ser_port__(self) -> serial.Serial:
-      pass
-
-   def __send__(self, outbuff: bytearray) -> int:
-      pass
-
-   def __read__(self) -> [None, bytearray]:
-      return super().__read__()
-
    def __str__(self):
       return "waveshare3chHat ver: 001"
 
    # -- -- -- -- -- -- -- --
-   # redis
+   # redis hook
    # -- -- -- -- -- -- -- --
 
    """
@@ -110,6 +89,9 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
       else:
          pass
 
+   # -- -- -- -- -- -- -- --
+   # core code
+   # -- -- -- -- -- -- -- --
    def __update_chnl_pin__(self, pmsg: redisPMsg):
       try:
          # -- -- -- --
@@ -131,9 +113,6 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
          print(e)
       finally:
          pass
-
-   def __on_set__(self, pmsg: redisPMsg):
-      print(pmsg)
 
    # -- -- -- -- -- -- -- --
    # threading
