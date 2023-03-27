@@ -35,6 +35,9 @@ class waveshare8chExpBoard(rpiHatBoard, threading.Thread):
       self.CHNL_PINS: {} = {"C1": 5, "C2": 6, "C3": 13
          , "C4": 16, "C5": 19, "C6": 20, "C7": 21, "C8": 26}
 
+   def __str__(self):
+      return "waveshare8chExpBoard ver: 001"
+
    def init(self, GPIO_MODE: int = GPIO.BCM) -> bool:
       try:
          # -- -- -- -- -- -- -- --
