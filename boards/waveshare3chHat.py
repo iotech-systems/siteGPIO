@@ -77,7 +77,6 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
    # -- -- -- -- -- -- -- --
    # redis hook
    # -- -- -- -- -- -- -- --
-
    """
       {'type': 'pmessage', 'pattern': 'DEVLAB3RHAT*'
          , 'channel': 'DEVLAB3RHAT_GPIO_OVERRIDE', 'data': 'PIN_DEVLAB3RHAT_CH_1'}
@@ -117,7 +116,6 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
    # -- -- -- -- -- -- -- --
    # threading
    # -- -- -- -- -- -- -- --
-
    def run(self) -> None:
       self.__runtime_thread__()
 
