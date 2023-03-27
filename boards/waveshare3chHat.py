@@ -1,6 +1,6 @@
 
-import json, time, redis
-import serial, os, threading
+import time, redis
+import os, threading
 from applib.utils import utils
 from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
 from applib.interfaces.rpiHatBoard import rpiHatBoard
