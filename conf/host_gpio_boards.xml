@@ -20,7 +20,7 @@
          <board id="devLabLCE4r" type="lctech4chModbus" args=";addr:=8;comminfo:=9600,E,8;" />
       </boards>
    </host>
-   <host>
+   <host name="lab-rpi0-8rls">
       <board id="devLab8rExpBoard" type="waveshare8chExpBoard" args=";mode:=bcm;" />
    </host>
 </gpio>
