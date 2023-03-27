@@ -18,39 +18,25 @@ class channelPinDriver(object):
       if override_state is not None:
          return override_state
       # -- -- -- --
-      calc_state: str = self.__calc_conf_state__()
+      calc_state: str = self.__calc_clock_state__()
       return calc_state
 
    def __get_override__(self) -> [None, int]:
-      if self.red_hash.OVERRIDE is None:
+      if self.red_hash.OVERRIDE in [None, "NIL"]:
          return None
-      state: str = str(self.red_hash.OVERRIDE["state"]).upper()
+      state: str = str(self.red_hash.OVERRIDE.upper())
       if state not in ("ON", "OFF"):
          return None
       # -- -- -- --
       return state
 
-   def __calc_conf_state__(self) -> str:
-      _none: [] = [None, ""]
+   def __calc_clock_state__(self) -> str:
       _off = "OFF"; _on = "ON"
-      if self.red_hash.CONF is None:
-         return _off
+      _none: [] = [None, "", "NIL"]
       # -- -- -- --
-      tOn: str = self.red_hash.CONF["tON"]
-      tOff: str = self.red_hash.CONF["tOFF"]
-      sOn: str = self.red_hash.CONF["sunOn"]
-      sOff: str = self.red_hash.CONF["sunOff"]
-      sOnOffset: int = int(self.red_hash.CONF["sunOnOffset"])
-      sOffOffset: int = int(self.red_hash.CONF["sunOffOffset"])
-      # -- start time not set! --
-      if tOn in _none and sOn in _none:
-         return _off
-      if tOff in _none and sOff in _none:
-         return _off
+      onHH, onMM = self.red_hash.ON.split(":")
+      offHH, offMM = self.red_hash.OFF.split(":")
       # -- -- -- --
-      _time_on = sOn if tOn in _none else tOn
-      _time_off = sOff if tOff in _none else tOff
+
       # -- -- -- --
-      print([_time_on, _time_off])
-      self.sun.is_sun_format(_time_on)
       return _off

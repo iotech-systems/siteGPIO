@@ -33,26 +33,36 @@ class redisChnlPinHash(object):
 
    def __init__(self, _hash: {}):
       self._hash: {} = _hash
+      self.DEVICE_ID: str = ""
       self.CHANNEL_NAME: str = ""
-      self.OVERRIDE: {} = None
-      self.CONF: {} = None
-      self.CHANNEL_ID: int = 0
+      self.OVERRIDE: str = ""
+      self.ON: str = ""
+      self.OFF: str = ""
+      self.BOARD_CHANNEL: int = 0
       self.__conf__()
 
    def __conf__(self):
+      # -- -- -- --
+      key = "DEVICE_ID"
+      if key in self._hash.keys():
+         self.DEVICE_ID = self._hash[key]
       # -- -- -- --
       key = "CHANNEL_NAME"
       if key in self._hash.keys():
          self.CHANNEL_NAME = self._hash[key]
       # -- -- -- --
-      key = "CHANNEL_ID"
+      key = "BOARD_CHANNEL"
       if key in self._hash.keys():
-         self.CHANNEL_ID = int(self._hash[key])
+         self.BOARD_CHANNEL = int(self._hash[key])
       # -- -- -- --
       key = "OVERRIDE"
       if key in self._hash.keys():
-         self.OVERRIDE = json.loads(self._hash[key])
+         self.OVERRIDE = self._hash["OVERRIDE"]
       # -- -- -- --
-      key = "CONF"
+      key = "ON"
       if key in self._hash.keys():
-         self.CONF = json.loads(self._hash[key])
+         self.ON = self._hash["ON"]
+      # -- -- -- --
+      key = "OFF"
+      if key in self._hash.keys():
+         self.OFF = self._hash["OFF"]

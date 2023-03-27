@@ -38,13 +38,13 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
       self.args = args
       # -- -- -- -- -- -- --
       self.ON_OFF_TABLE: {} = {"ON": 0, "OFF": 1}
-      self.ch_pins: {} = {"C1": 26, "C2": 20, "C3": 21}
+      self.CHNL_PINS: {} = {"C1": 26, "C2": 20, "C3": 21}
 
    def init(self, GPIO_MODE: int = GPIO.BCM) -> bool:
       try:
          # -- -- -- -- -- -- -- --
          GPIO.setmode(GPIO_MODE)
-         for p in self.ch_pins.values():
+         for p in self.CHNL_PINS.values():
             GPIO.setup(p, GPIO.OUT)
             GPIO.output(p, self.ON_OFF_TABLE["OFF"])
          # -- -- -- -- -- -- -- --
@@ -59,7 +59,7 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
          key: str = f"BOARD_{self.board_id}"
          self.red.delete(key)
          self.red.hset(key, mapping={"HOST": hn, "IP": ip
-            , "REDIS_PATT_TRIGGER": redis_patt, "DTS": dts})
+            , "REDIS_TRIGGER_PATT": redis_patt, "DTS": dts})
          # -- -- -- -- -- -- -- --
          redis_patt: str = f"{self.board_id}*"
          self.red_sub.psubscribe(**{redis_patt: self.__on_redis_msg__})
@@ -105,9 +105,7 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
    """
    def __on_redis_msg__(self, msg: {}):
       pmsg: redisPMsg = redisPMsg(msg)
-      if pmsg.chnl == f"{self.board_id}_GPIO_OVERRIDE":
-         self.__update_chnl_pin__(pmsg)
-      elif pmsg.chnl == f"{self.board_id}_GPIO_CONF_CHANGE":
+      if pmsg.chnl == f"{self.board_id}_GPIO_CONF_CHANGE":
          self.__update_chnl_pin__(pmsg)
       else:
          pass
@@ -123,9 +121,11 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
             channelPinDriver(red_hash, self.sun, self.ON_OFF_TABLE["ON"])
          # -- -- -- --
          STATE: str = chn_pin_driver.get_state()
-         int_state: int = self.ON_OFF_TABLE[STATE]
-         GPIO.output(pin, b_state)
-         print(f"OVERRIDE: {chnl} : {pin} : {int_state}")
+         INT_STATE: int = self.ON_OFF_TABLE[STATE]
+         PIN: int = self.CHNL_PINS[f"C{red_hash.BOARD_CHANNEL}"]
+         GPIO.output(PIN, INT_STATE)
+         if GPIO.input(PIN) == INT_STATE:
+            print("NEW_PIN_STATE_OK")
       except Exception as e:
          print(e)
       finally:
@@ -144,7 +144,7 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
          if state in self.ON_OFF_TABLE.keys():
             b_state = self.ON_OFF_TABLE[state]
          # -- -- -- --
-         pin: int = self.ch_pins[chnl]
+         pin: int = self.CHNL_PINS[chnl]
          GPIO.output(pin, b_state)
          print(f"OVERRIDE: {chnl} : {pin} : {b_state}")
          # -- -- -- --
