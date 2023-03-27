@@ -10,6 +10,7 @@
    <host name="3cpo">
       <boards>
          <board id="devLab3rHat" type="waveshare3chHat" args=";mode:=bcm;" />
+         <board id="devLab8r" type="waveshare8chExpBoard" args=";mode:=bcm;" />
          <board id="devLabLC4r" type="lctech4chModbus" args=";addr:=8;comminfo:=9600,E,8;" />
       </boards>
    </host>
