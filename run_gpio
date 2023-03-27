@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os.path, redis
-import time
+import time, setproctitle
 import xml.etree.ElementTree as _et
 import configparser as _cp
 from applib.boardManager import boardManager
@@ -64,4 +64,5 @@ def main():
 
 # -- -- entry point -- --
 if __name__ == "__main__":
+   setproctitle.setproctitle("siteGPIO")
    main()
