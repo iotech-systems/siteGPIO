@@ -21,6 +21,8 @@
       </boards>
    </host>
    <host name="lab-rpi0-8rls">
-      <board id="devLab8r" type="waveshare8chExpBoard" args=";mode:=bcm;" />
+      <boards>
+         <board id="devLab8r" type="waveshare8chExpBoard" args=";mode:=bcm;" />
+      </boards>
    </host>
 </gpio>
