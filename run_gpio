@@ -9,9 +9,14 @@ from applib.sunclock import sunClock
 from applib.mainLoop import mainLoop
 
 
-INI_FILE: str = os.getenv("SITEGPIO_INI")
+START_INI_PATH = "start_ini"
+if not os.path.islink(START_INI_PATH):
+   print(f"START_INI_SIMLINK_NOT_FOUND: {START_INI_PATH}")
+   exit(1)
+print(f"\nSTART_INI_SIMLINK_NOT_FOUND: {START_INI_PATH}")
+
 INI: _cp.ConfigParser = _cp.ConfigParser()
-INI.read(INI_FILE)
+INI.read(START_INI_PATH)
 
 REDIS_SEC = "REDIS"
 RED_HOST: str = INI.get(REDIS_SEC, "HOST")
