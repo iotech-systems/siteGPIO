@@ -7,6 +7,10 @@ from applib.datatypes import redisChnlPinHash
 
 class channelPinDriver(object):
 
+   ON: str = "ON"
+   OFF: str = "OFF"
+   ON_OFF: [] = [ON, OFF]
+
    def __init__(self, red_hash: redisChnlPinHash
          , sun: sunClock
          , active_state: int = 1):
@@ -16,6 +20,8 @@ class channelPinDriver(object):
       self.active_state: int = active_state
 
    def get_state(self) -> str:
+      if not self.__is_good_input__():
+         return channelPinDriver.OFF
       override_state: str = self.__get_override__()
       if override_state is not None:
          return override_state
@@ -27,7 +33,7 @@ class channelPinDriver(object):
       if self.red_hash.OVERRIDE in [None, "NIL"]:
          return None
       state: str = str(self.red_hash.OVERRIDE.upper())
-      if state not in ("ON", "OFF"):
+      if state not in channelPinDriver.ON_OFF:
          return None
       # -- -- -- --
       return state
@@ -48,3 +54,10 @@ class channelPinDriver(object):
       # -- -- -- --
       state: bool = clock.get_state(timeOn, timeOff)
       return _on if state else _off
+
+   def __is_good_input__(self):
+      onHH, onMM = self.red_hash.ON.split(":")
+      timeOn = f"{onHH}:{onMM}"
+      offHH, offMM = self.red_hash.OFF.split(":")
+      timeOff = f"{offHH}:{offMM}"
+      return not (timeOn == timeOff)

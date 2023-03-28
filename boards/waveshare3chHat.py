@@ -6,7 +6,6 @@ from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
 from applib.interfaces.rpiHatBoard import rpiHatBoard
 from applib.channelPinDriver import channelPinDriver
 from applib.sunclock import sunClock
-from applib.clock import clock
 # "armv7l": on running on RPi
 if os.uname()[4].startswith("armv"):
    import RPi.GPIO as GPIO
