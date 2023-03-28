@@ -11,9 +11,10 @@ from applib.mainLoop import mainLoop
 
 START_INI_PATH = "start_ini"
 if not os.path.islink(START_INI_PATH):
+   print(f"CWD: {os.getcwd()}")
    print(f"START_INI_SIMLINK_NOT_FOUND: {START_INI_PATH}")
    exit(1)
-print(f"\nSTART_INI_SIMLINK_NOT_FOUND: {START_INI_PATH}")
+print(f"\n[ START_INI_SIMLINK_FOUND: {START_INI_PATH} ]\n")
 
 INI: _cp.ConfigParser = _cp.ConfigParser()
 INI.read(START_INI_PATH)
