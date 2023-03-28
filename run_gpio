@@ -8,25 +8,14 @@ from applib.boardManager import boardManager
 from applib.sunclock import sunClock
 
 
-IOTECH_ENV: str = os.getenv("IOTECH_ENV")
-if IOTECH_ENV is None:
-   pass
-elif IOTECH_ENV == "DEV":
-   pass
-else:
-   pass
-
-INI_FILE: str = "sitegpio.ini"
+INI_FILE: str = os.getenv("SITEGPIO_INI")
 INI: _cp.ConfigParser = _cp.ConfigParser()
 INI.read(INI_FILE)
 
-REDIS_CONN: str = "REDIS_PROD"
-if IOTECH_ENV == "DEV":
-   REDIS_CONN = "REDIS_DEV"
-
-RED_HOST: str = INI.get(REDIS_CONN, "HOST")
-RED_PORT: int = INI.getint(REDIS_CONN, "PORT")
-RED_PWD: str = INI.get("REDIS_CORE", "PWD")
+REDIS_SEC = "REDIS"
+RED_HOST: str = INI.get(REDIS_SEC, "HOST")
+RED_PORT: int = INI.getint(REDIS_SEC, "PORT")
+RED_PWD: str = INI.get(REDIS_SEC, "PWD")
 # ---  create & test  ---
 RED: redis.Redis = redis.Redis(host=RED_HOST, port=RED_PORT
    , password=RED_PWD, decode_responses=True)
