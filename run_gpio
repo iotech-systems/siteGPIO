@@ -6,6 +6,7 @@ import xml.etree.ElementTree as _et
 import configparser as _cp
 from applib.boardManager import boardManager
 from applib.sunclock import sunClock
+from applib.mainLoop import mainLoop
 
 
 INI_FILE: str = os.getenv("SITEGPIO_INI")
@@ -43,9 +44,14 @@ if not BOARD_MANAGER.start():
    raise Exception("BoardManagerStartError")
 
 def main():
+   _mainLoop: mainLoop = mainLoop()
    while True:
       try:
-         print("main...")
+         rval: int = _mainLoop.loop_tick(board_man=BOARD_MANAGER, red=RED)
+         if rval == 0:
+            pass
+         else:
+            pass
          time.sleep(8.0)
       except Exception as e:
          print(e)

@@ -22,7 +22,7 @@ class clock(object):
       return True
 
    @staticmethod
-   def get_state(ont: str, oft: str):
+   def get_state(ont: str, oft: str) -> bool:
       time_on: datetime.time = clock.get_time(ont)
       time_off: datetime.time = clock.get_time(oft)
       # -- calc --

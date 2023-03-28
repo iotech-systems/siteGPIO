@@ -6,6 +6,7 @@ from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
 from applib.interfaces.rpiHatBoard import rpiHatBoard
 from applib.channelPinDriver import channelPinDriver
 from applib.sunclock import sunClock
+from applib.clock import clock
 # "armv7l": on running on RPi
 if os.uname()[4].startswith("armv"):
    import RPi.GPIO as GPIO
@@ -22,15 +23,19 @@ else:
 """
 class waveshare3chHat(rpiHatBoard, threading.Thread):
 
-   def __init__(self, xid: str
+   ACTIVE_STATE: int = 0
+   ON_OFF_TABLE: {} = {"ON": 0, "OFF": 1}
+   CHNL_PINS: {} = {"C1": 26, "C2": 20, "C3": 21}
+
+   def __init__(self, xml_id: str
          , red: redis.Redis
          , sun: sunClock
          , args: object):
       # -- -- -- -- -- -- --
       threading.Thread.__init__(self)
       super().__init__()
-      self.id = xid
-      self.board_id = self.id.upper()
+      self.xml_id = xml_id
+      self.board_id = self.xml_id.upper()
       self.red: redis.Redis = red
       self.red_sub = self.red.pubsub()
       self.red_sbu_thread: threading.Thread = None
@@ -65,7 +70,7 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
          self.red_sub.psubscribe(**{redis_patt: self.__on_redis_msg__})
          self.red_sbu_thread: threading.Thread = \
             self.red_sub.run_in_thread(sleep_time=0.001)
-         self.red_sbu_thread.name = self.id
+         self.red_sbu_thread.name = self.xml_id
          return True
       except Exception as e:
          print(e)
@@ -119,13 +124,34 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
    def run(self) -> None:
       self.__runtime_thread__()
 
+   def __update_redis__(self):
+      # update board pin states
+      for pk in waveshare3chHat.CHNL_PINS.keys():
+         try:
+            chn_id: str = pk.replace("C", "")
+            PIN: int = waveshare3chHat.CHNL_PINS[pk]
+            pv: int = int(GPIO.input(PIN))
+            RED_PIN_KEY: str = utils.pin_redis_key(self.board_id, chn_id)
+            ST: str = f"ON:{pv}" if pv == waveshare3chHat.ACTIVE_STATE else f"OFF:{pv}"
+            d: {} = {"PIN": f"{pk}:{PIN}", "LAST_STATE": ST
+               , "PIN_ACTIVE_STATE": waveshare3chHat.ACTIVE_STATE
+               , "LAST_STATE_READ_DTS": utils.dts_utc(with_tz=True)}
+            self.red.select(redisDBIdx.DB_IDX_GPIO.value)
+            rv = self.red.hset(RED_PIN_KEY, mapping=d)
+            print(rv)
+         except Exception as e:
+            print(e)
+
    def __runtime_thread__(self):
       cnt: int = 0
       while True:
          try:
-            time.sleep(2.0)
-            if cnt == 10:
-               print(f"__thread__ : {self}")
+            time.sleep(4.0)
+            if cnt % 4 == 0:
+               pass
+            if cnt == 8:
+               print(f"[ board_thread : {self} ]")
+               self.__update_redis__()
                cnt = 0
             # -- -- -- --
             cnt += 1

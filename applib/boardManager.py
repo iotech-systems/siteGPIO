@@ -29,7 +29,7 @@ class boardManager(object):
          _type = e.attrib["type"]
          if _type == "waveshare3chHat":
             board: waveshare3chHat = \
-               waveshare3chHat(xid=_id, red=self.red, sun=self.sun, args=_args)
+               waveshare3chHat(xml_id=_id, red=self.red, sun=self.sun, args=_args)
             board.init()
             return board
          elif _type == "waveshare8chExpBoard":

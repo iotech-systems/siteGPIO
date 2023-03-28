@@ -1,6 +1,6 @@
 
-import json, time, redis
-import serial, os, threading
+import time, redis
+import os, threading
 from applib.utils import utils
 from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
 from applib.interfaces.rpiHatBoard import rpiHatBoard
@@ -15,6 +15,11 @@ else:
 
 
 class waveshare8chExpBoard(rpiHatBoard, threading.Thread):
+
+   ACTIVE_STATE: int = 0
+   ON_OFF_TABLE: {} = {"ON": 0, "OFF": 1}
+   CHNL_PINS: {} = {"C1": 5, "C2": 6, "C3": 13
+      , "C4": 16, "C5": 19, "C6": 20, "C7": 21, "C8": 26}
 
    def __init__(self, xid: str
          , red: redis.Redis
@@ -31,9 +36,9 @@ class waveshare8chExpBoard(rpiHatBoard, threading.Thread):
       self.sun: sunClock = sun
       self.args = args
       # -- -- -- -- -- -- --
-      self.ON_OFF_TABLE: {} = {"ON": 0, "OFF": 1}
-      self.CHNL_PINS: {} = {"C1": 5, "C2": 6, "C3": 13
-         , "C4": 16, "C5": 19, "C6": 20, "C7": 21, "C8": 26}
+      # self.ON_OFF_TABLE: {} = {"ON": 0, "OFF": 1}
+      # self.CHNL_PINS: {} = {"C1": 5, "C2": 6, "C3": 13
+      #    , "C4": 16, "C5": 19, "C6": 20, "C7": 21, "C8": 26}
 
    def __str__(self):
       return "waveshare8chExpBoard ver: 001"
@@ -42,9 +47,9 @@ class waveshare8chExpBoard(rpiHatBoard, threading.Thread):
       try:
          # -- -- -- -- -- -- -- --
          GPIO.setmode(GPIO_MODE)
-         for p in self.CHNL_PINS.values():
+         for p in waveshare8chExpBoard.CHNL_PINS.values():
             GPIO.setup(p, GPIO.OUT)
-            GPIO.output(p, self.ON_OFF_TABLE["OFF"])
+            GPIO.output(p, waveshare8chExpBoard.ON_OFF_TABLE["OFF"])
          # -- -- -- -- -- -- -- --
          if not self.red.ping():
             raise Exception("NoRedPong")
@@ -91,11 +96,11 @@ class waveshare8chExpBoard(rpiHatBoard, threading.Thread):
          _hash = self.red.hgetall(CHNL_PIN_KEY)
          red_hash: redisChnlPinHash = redisChnlPinHash(_hash)
          chn_pin_driver: channelPinDriver = \
-            channelPinDriver(red_hash, self.sun, self.ON_OFF_TABLE["ON"])
+            channelPinDriver(red_hash, self.sun, waveshare8chExpBoard.ON_OFF_TABLE["ON"])
          # -- -- -- --
          STATE: str = chn_pin_driver.get_state()
-         INT_STATE: int = self.ON_OFF_TABLE[STATE]
-         PIN: int = self.CHNL_PINS[f"C{red_hash.BOARD_CHANNEL}"]
+         INT_STATE: int = waveshare8chExpBoard.ON_OFF_TABLE[STATE]
+         PIN: int = waveshare8chExpBoard.CHNL_PINS[f"C{red_hash.BOARD_CHANNEL}"]
          GPIO.output(PIN, INT_STATE)
          # -- -- -- --
          if GPIO.input(PIN) == INT_STATE:
@@ -115,13 +120,34 @@ class waveshare8chExpBoard(rpiHatBoard, threading.Thread):
    def run(self) -> None:
       self.__runtime_thread__()
 
+   def __update_redis__(self):
+      # update board pin states
+      for pk in waveshare8chExpBoard.CHNL_PINS.keys():
+         try:
+            chn_id: str = pk.replace("C", "")
+            PIN: int = waveshare8chExpBoard.CHNL_PINS[pk]
+            pv: int = int(GPIO.input(PIN))
+            RED_PIN_KEY: str = utils.pin_redis_key(self.board_id, chn_id)
+            ST: str = f"ON:{pv}" if pv == waveshare8chExpBoard.ACTIVE_STATE else f"OFF:{pv}"
+            d: {} = {"PIN": f"{pk}:{PIN}", "LAST_STATE": ST
+               , "PIN_ACTIVE_STATE": waveshare8chExpBoard.ACTIVE_STATE
+               , "LAST_STATE_READ_DTS": utils.dts_utc(with_tz=True)}
+            self.red.select(redisDBIdx.DB_IDX_GPIO.value)
+            rv = self.red.hset(RED_PIN_KEY, mapping=d)
+            print(rv)
+         except Exception as e:
+            print(e)
+
    def __runtime_thread__(self):
       cnt: int = 0
       while True:
          try:
-            time.sleep(2.0)
-            if cnt == 10:
-               print(f"__thread__ : {self}")
+            time.sleep(4.0)
+            if cnt % 4 == 0:
+               pass
+            if cnt == 8:
+               print(f"[ board_thread : {self} ]")
+               self.__update_redis__()
                cnt = 0
             # -- -- -- --
             cnt += 1

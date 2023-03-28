@@ -1,4 +1,6 @@
 
+import datetime
+from applib.clock import clock
 from applib.sunclock import sunClock
 from applib.datatypes import redisChnlPinHash
 
@@ -35,8 +37,14 @@ class channelPinDriver(object):
       _none: [] = [None, "", "NIL"]
       # -- -- -- --
       onHH, onMM = self.red_hash.ON.split(":")
+      timeOn = f"{onHH}:{onMM}"
+      if sunClock.is_sun_format(onHH):
+         timeOn = self.sun.get_time(onHH, int(onMM))
+      # -- -- -- --
       offHH, offMM = self.red_hash.OFF.split(":")
+      timeOff = f"{offHH}:{offMM}"
+      if sunClock.is_sun_format(offHH):
+         timeOff = self.sun.get_time(offHH, int(offMM))
       # -- -- -- --
-
-      # -- -- -- --
-      return _off
+      state: bool = clock.get_state(timeOn, timeOff)
+      return _on if state else _off
