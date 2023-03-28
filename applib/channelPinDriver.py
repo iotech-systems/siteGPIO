@@ -1,5 +1,4 @@
 
-import datetime
 from applib.clock import clock
 from applib.sunclock import sunClock
 from applib.datatypes import redisChnlPinHash

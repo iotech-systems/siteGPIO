@@ -70,6 +70,7 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
          self.red_sbu_thread: threading.Thread = \
             self.red_sub.run_in_thread(sleep_time=0.001)
          self.red_sbu_thread.name = self.xml_id
+         self.red_sbu_thread.start()
          return True
       except Exception as e:
          print(e)
