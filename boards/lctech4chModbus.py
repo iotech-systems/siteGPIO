@@ -137,5 +137,5 @@ class lctech4chModbus(modbusBoard, threading.Thread):
 
    def __runtime_thread__(self):
       while True:
-         time.sleep(2.0)
-         print(f"__thread__ : {self}")
+         time.sleep(8.0)
+         print(f"\n[ board_thread : {self} ]\n")

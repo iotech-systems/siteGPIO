@@ -141,13 +141,44 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
          except Exception as e:
             print(e)
 
+   def __refresh_channel__(self):
+      # update board pin states
+      def _on_each(pk):
+         try:
+            chn_id: str = pk.replace("C", "")
+            PIN: int = waveshare3chHat.CHNL_PINS[pk]
+            pv: int = int(GPIO.input(PIN))
+            RED_PIN_KEY: str = utils.pin_redis_key(self.board_id, chn_id)
+            self.red.select(redisDBIdx.DB_IDX_GPIO.value)
+            _hash = self.red.hgetall(RED_PIN_KEY)
+            red_hash: redisChnlPinHash = redisChnlPinHash(_hash)
+            chn_pin_driver: channelPinDriver = \
+               channelPinDriver(red_hash, self.sun, self.ON_OFF_TABLE["ON"])
+            # -- -- -- --
+            STATE: str = chn_pin_driver.get_state()
+            NEW_INT_STATE: int = self.ON_OFF_TABLE[STATE]
+            PIN: int = self.CHNL_PINS[f"C{red_hash.BOARD_CHANNEL}"]
+            CURR_STATE = int(GPIO.input(PIN))
+            if CURR_STATE == NEW_INT_STATE:
+               print(f"NO_STATE_UPDATED_NEEDED:: CS - {CURR_STATE} : NIT - {NEW_INT_STATE}")
+               return
+            GPIO.output(PIN, NEW_INT_STATE)
+            # -- -- -- --
+            if GPIO.input(PIN) == NEW_INT_STATE:
+               print(f"NEW_PIN_STATE_OK: {NEW_INT_STATE}")
+         except Exception as e:
+            print(e)
+      # -- -- -- --
+      for _pk in waveshare3chHat.CHNL_PINS.keys():
+        _on_each(_pk)
+
    def __runtime_thread__(self):
       cnt: int = 0
       while True:
          try:
             time.sleep(4.0)
             if cnt % 4 == 0:
-               pass
+               self.__refresh_channel__()
             if cnt == 8:
                print(f"[ board_thread : {self} ]")
                self.__update_redis__()
