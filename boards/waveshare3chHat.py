@@ -70,7 +70,8 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
          self.red_sbu_thread: threading.Thread = \
             self.red_sub.run_in_thread(sleep_time=0.001)
          self.red_sbu_thread.name = self.xml_id
-         self.red_sbu_thread.start()
+         if not self.red_sbu_thread.is_alive():
+            self.red_sbu_thread.start()
          return True
       except Exception as e:
          print(e)
@@ -148,7 +149,6 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
          try:
             chn_id: str = pk.replace("C", "")
             PIN: int = waveshare3chHat.CHNL_PINS[pk]
-            pv: int = int(GPIO.input(PIN))
             RED_PIN_KEY: str = utils.pin_redis_key(self.board_id, chn_id)
             self.red.select(redisDBIdx.DB_IDX_GPIO.value)
             _hash = self.red.hgetall(RED_PIN_KEY)
@@ -188,3 +188,4 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
             cnt += 1
          except Exception as e:
             print(e)
+            time.sleep(16.0)

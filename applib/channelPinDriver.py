@@ -19,11 +19,13 @@ class channelPinDriver(object):
       self.active_state: int = active_state
 
    def get_state(self) -> str:
-      if not self.__is_good_input__():
-         return channelPinDriver.OFF
+      # -- -- -- --
       override_state: str = self.__get_override__()
       if override_state is not None:
          return override_state
+      # -- -- -- --
+      if not self.__is_good_input__():
+         return channelPinDriver.OFF
       # -- -- -- --
       calc_state: str = self.__calc_clock_state__()
       return calc_state
