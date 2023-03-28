@@ -29,6 +29,7 @@ RED: redis.Redis = redis.Redis(host=RED_HOST, port=RED_PORT
 if not RED.ping():
    raise Exception("NoRedPong")
 # -- -- -- -- -- -- -- --
+print("GoodRedPong")
 
 
 BOARDS_XML_FILE: str = INI.get("CORE", "BOARDS_XML_FILE")
