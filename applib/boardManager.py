@@ -38,7 +38,7 @@ class boardManager(object):
             board.init()
             return board
          elif _type == "lctech4chModbus":
-            board: lctech4chModbus = lctech4chModbus(xid=_id, red=self.red, args=_args)
+            board: lctech4chModbus = lctech4chModbus(xml_id=_id, red=self.red, sun=self.sun, args=_args)
             board.init()
             return board
          else:

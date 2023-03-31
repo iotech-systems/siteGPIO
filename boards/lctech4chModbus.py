@@ -3,21 +3,29 @@ import threading, time, redis
 from crcmod.predefined import *
 import serial, xml.etree.ElementTree as _et
 from applib.interfaces.modbusBoard import modbusBoard
+from applib.sunclock import sunClock
 
 
 class lctech4chModbus(modbusBoard, threading.Thread):
 
    baudrates = {4800: 0x02, 9600: 0x03, 19200: 0x04}
 
-   def __init__(self, xid: str, red: redis.Redis, args: object):
+   def __init__(self, xml_id: str
+         , red: redis.Redis
+         , sun: sunClock
+         , args: object):
+      # -- -- -- --
       threading.Thread.__init__(self)
       super().__init__(args=args)
-      self.id = xid
+      self.xml_id = xml_id
+      self.board_id = self.xml_id.upper()
       self.red: redis.Redis = red
       self.red_sub = self.red.pubsub()
       self.args = args
       ser_port: serial.Serial = serial.Serial()
       modbus_adr: int = 0
+      self.red_sub = self.red.pubsub()
+      self.red_sbu_thread: threading.Thread = None
 
    def init(self):
       pass
@@ -135,7 +143,25 @@ class lctech4chModbus(modbusBoard, threading.Thread):
    def run(self) -> None:
       self.__runtime_thread__()
 
+   def __refresh_channel__(self):
+      pass
+
+   def __update_redis__(self):
+      pass
+
    def __runtime_thread__(self):
+      cnt: int = 0
       while True:
-         time.sleep(8.0)
-         print(f"\n[ board_thread : {self} ]\n")
+         try:
+            time.sleep(4.0)
+            if cnt % 4 == 0:
+               self.__refresh_channel__()
+            if cnt == 8:
+               print(f"[ board_thread : {self} ]")
+               self.__update_redis__()
+               cnt = 0
+            # -- -- -- --
+            cnt += 1
+         except Exception as e:
+            print(e)
+            time.sleep(16.0)

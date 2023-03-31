@@ -41,8 +41,8 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
       self.sun: sunClock = sun
       self.args = args
       # -- -- -- -- -- -- --
-      self.ON_OFF_TABLE: {} = {"ON": 0, "OFF": 1}
-      self.CHNL_PINS: {} = {"C1": 26, "C2": 20, "C3": 21}
+      # self.ON_OFF_TABLE: {} = {"ON": 0, "OFF": 1}
+      # self.CHNL_PINS: {} = {"C1": 26, "C2": 20, "C3": 21}
 
    def init(self, GPIO_MODE: int = GPIO.BCM) -> bool:
       try:
@@ -83,10 +83,6 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
    # -- -- -- -- -- -- -- --
    # redis hook
    # -- -- -- -- -- -- -- --
-   """
-      {'type': 'pmessage', 'pattern': 'DEVLAB3RHAT*'
-         , 'channel': 'DEVLAB3RHAT_GPIO_OVERRIDE', 'data': 'PIN_DEVLAB3RHAT_CH_1'}
-   """
    def __on_redis_msg__(self, msg: {}):
       pmsg: redisPMsg = redisPMsg(msg)
       if pmsg.chnl == f"{self.board_id}_GPIO_CONF_CHANGE":
