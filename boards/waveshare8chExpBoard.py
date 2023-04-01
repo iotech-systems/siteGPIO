@@ -115,12 +115,11 @@ class waveshare8chExpBoard(rpiHatBoard, threading.Thread):
    # -- -- -- -- -- -- -- --
    # threading
    # -- -- -- -- -- -- -- --
-
    def run(self) -> None:
       self.__runtime_thread__()
 
    def __update_redis__(self):
-      # -- -- -- --
+      upds: [] = []
       def _oneach(pk):
          try:
             chn_id: str = pk.replace("C", "")
@@ -133,12 +132,16 @@ class waveshare8chExpBoard(rpiHatBoard, threading.Thread):
                , "LAST_STATE_READ_DTS": utils.dts_utc(with_tz=True)}
             self.red.select(redisDBIdx.DB_IDX_GPIO.value)
             rv = self.red.hset(RED_PIN_KEY, mapping=d)
-            print(rv)
+            upds.append(rv)
          except Exception as e:
             print(e)
       # -- -- -- --
       for _pk in waveshare8chExpBoard.CHNL_PINS.keys():
          _oneach(_pk)
+      # -- -- -- --
+      buff = ", ".join([str(x) for x in upds])
+      print(f"[ {self.board_id} => redis updates: {buff} ]")
+      # -- -- -- --
 
    def __refresh_channel__(self):
       # update board pin states
@@ -169,10 +172,12 @@ class waveshare8chExpBoard(rpiHatBoard, threading.Thread):
       # -- -- -- --
       for _pk in waveshare8chExpBoard.CHNL_PINS.keys():
         _on_each(_pk)
+      # -- -- -- --
 
    def __runtime_thread__(self):
-      cnt: int = 0
-      while True:
+      _cnt: int = 0
+      # -- -- -- --
+      def __loop(cnt: int):
          try:
             time.sleep(4.0)
             if cnt % 4 == 0:
@@ -186,3 +191,7 @@ class waveshare8chExpBoard(rpiHatBoard, threading.Thread):
          except Exception as e:
             print(e)
             time.sleep(16.0)
+      # -- -- -- --
+      while True:
+         __loop(_cnt)
+      # -- -- -- --

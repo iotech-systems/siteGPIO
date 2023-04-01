@@ -1,12 +1,15 @@
 
-import threading, time, redis
 from crcmod.predefined import *
+import os, threading, time, redis
 import serial, xml.etree.ElementTree as _et
+from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
+from applib.interfaces.redisHook import redisHook
 from applib.interfaces.modbusBoard import modbusBoard
 from applib.sunclock import sunClock
+from applib.utils import utils
 
 
-class lctech4chModbus(modbusBoard, threading.Thread):
+class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
 
    baudrates = {4800: 0x02, 9600: 0x03, 19200: 0x04}
 
@@ -28,7 +31,48 @@ class lctech4chModbus(modbusBoard, threading.Thread):
       self.red_sbu_thread: threading.Thread = None
 
    def init(self):
-      pass
+      try:
+         # -- -- -- -- -- -- -- --
+         if not self.red.ping():
+            raise Exception("NoRedPong")
+         # -- -- -- -- -- -- -- --
+         hn: str = os.uname()[1]
+         ip: str = utils.lan_ip()
+         dts: str = utils.dts_utc(with_tz=True)
+         redis_patt: str = f"{self.board_id}*"
+         self.red.select(redisDBIdx.DB_IDX_GPIO.value)
+         key: str = f"BOARD_{self.board_id}"
+         self.red.delete(key)
+         self.red.hset(key, mapping={"HOST": hn, "IP": ip
+            , "REDIS_TRIGGER_PATT": redis_patt, "DTS": dts})
+         # -- -- -- -- -- -- -- --
+         redis_patt: str = f"{self.board_id}*"
+         self.red_sub.psubscribe(**{redis_patt: self.redhook_on_msg})
+         self.red_sbu_thread: threading.Thread = \
+            self.red_sub.run_in_thread(sleep_time=0.001)
+         self.red_sbu_thread.name = self.xml_id
+         if not self.red_sbu_thread.is_alive():
+            self.red_sbu_thread.start()
+         return True
+      except Exception as e:
+         print(e)
+         return False
+
+   # -- -- -- -- -- -- -- --
+   # redis hook
+   # -- -- -- -- -- -- -- --
+   def redhook_on_msg(self, msg: {}):
+      try:
+         pmsg: redisPMsg = redisPMsg(msg)
+         if pmsg.chnl == f"{self.board_id}_GPIO_CONF_CHANGE":
+            self.redhook_process_msg(pmsg)
+         else:
+            pass
+      except Exception as e:
+         print(e)
+
+   def redhook_process_msg(self, redMsg: redisPMsg):
+      print(redMsg)
 
    def set_channel(self, chnl: int, val: bool):
       data = self.__set_channel_buff__(chnl, val)

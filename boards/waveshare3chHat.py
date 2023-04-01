@@ -3,6 +3,7 @@ import time, redis
 import os, threading
 from applib.utils import utils
 from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
+from applib.interfaces.redisHook import redisHook
 from applib.interfaces.rpiHatBoard import rpiHatBoard
 from applib.channelPinDriver import channelPinDriver
 from applib.sunclock import sunClock
@@ -20,7 +21,7 @@ else:
    20  |  28  | GPIO.28 -> CH2
    21  |  29  | GPIO.29 -> CH3
 """
-class waveshare3chHat(rpiHatBoard, threading.Thread):
+class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
 
    ACTIVE_STATE: int = 0
    ON_OFF_TABLE: {} = {"ON": 0, "OFF": 1}
@@ -66,7 +67,7 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
             , "REDIS_TRIGGER_PATT": redis_patt, "DTS": dts})
          # -- -- -- -- -- -- -- --
          redis_patt: str = f"{self.board_id}*"
-         self.red_sub.psubscribe(**{redis_patt: self.__on_redis_msg__})
+         self.red_sub.psubscribe(**{redis_patt: self.redhook_on_msg})
          self.red_sbu_thread: threading.Thread = \
             self.red_sub.run_in_thread(sleep_time=0.001)
          self.red_sbu_thread.name = self.xml_id
@@ -83,12 +84,18 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
    # -- -- -- -- -- -- -- --
    # redis hook
    # -- -- -- -- -- -- -- --
-   def __on_redis_msg__(self, msg: {}):
-      pmsg: redisPMsg = redisPMsg(msg)
-      if pmsg.chnl == f"{self.board_id}_GPIO_CONF_CHANGE":
-         self.__update_chnl_pin__(pmsg)
-      else:
-         pass
+   def redhook_on_msg(self, msg: {}):
+      try:
+         pmsg: redisPMsg = redisPMsg(msg)
+         if pmsg.chnl == f"{self.board_id}_GPIO_CONF_CHANGE":
+            self.redhook_process_msg(pmsg)
+         else:
+            pass
+      except Exception as e:
+         print(e)
+
+   def redhook_process_msg(self, redMsg: redisPMsg):
+      self.__update_chnl_pin__(redMsg)
 
    # -- -- -- -- -- -- -- --
    # core code
@@ -122,7 +129,7 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
       self.__runtime_thread__()
 
    def __update_redis__(self):
-      # update board pin states
+      upds: [] = []
       for pk in waveshare3chHat.CHNL_PINS.keys():
          try:
             chn_id: str = pk.replace("C", "")
@@ -135,9 +142,13 @@ class waveshare3chHat(rpiHatBoard, threading.Thread):
                , "LAST_STATE_READ_DTS": utils.dts_utc(with_tz=True)}
             self.red.select(redisDBIdx.DB_IDX_GPIO.value)
             rv = self.red.hset(RED_PIN_KEY, mapping=d)
-            print(rv)
+            upds.append(rv)
          except Exception as e:
             print(e)
+      # -- -- -- --
+      buff = ", ".join([str(x) for x in upds])
+      print(f"[ {self.board_id} => redis updates: {buff} ]")
+      # -- -- -- --
 
    def __refresh_channel__(self):
       # update board pin states
