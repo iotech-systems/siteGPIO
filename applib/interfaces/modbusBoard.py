@@ -1,5 +1,5 @@
 
-import time, serial
+import abc, time, serial
 
 
 class modbusBoard(object):
@@ -17,7 +17,12 @@ class modbusBoard(object):
    def set_all_channels(self, val: bool):
       pass
 
-   def read_channel(self, chnl: int):
+   @abc.abstractmethod
+   def read_channel(self, chnl: int) -> int:
+      pass
+
+   @abc.abstractmethod
+   def write_channel(self, chnl: int, val: int) -> int:
       pass
 
    def set_bus_address(self, old_adr: int, new_adr: int):
@@ -26,8 +31,8 @@ class modbusBoard(object):
    def read_bus_address(self, old_adr: int):
       pass
 
-   @staticmethod
-   def ping(ser: serial.Serial, baudrate: int):
+   @abc.abstractmethod
+   def ping(self) -> bool:
       pass
 
    def __ser_port__(self) -> serial.Serial:
@@ -60,8 +65,9 @@ class modbusBoard(object):
             inbuff.extend(ser.read(1))
             if ser.in_waiting == 0:
                break
-         print(f" >>>>>> RESP: {inbuff}")
+         print(f" >>> RESP: {inbuff}")
          # -- return --
          return inbuff
       except Exception as e:
+         print(e)
          return None

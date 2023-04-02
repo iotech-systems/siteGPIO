@@ -35,10 +35,6 @@ class waveshare8chExpBoard(rpiHatBoard, threading.Thread):
       self.red_sbu_thread: threading.Thread = None
       self.sun: sunClock = sun
       self.args = args
-      # -- -- -- -- -- -- --
-      # self.ON_OFF_TABLE: {} = {"ON": 0, "OFF": 1}
-      # self.CHNL_PINS: {} = {"C1": 5, "C2": 6, "C3": 13
-      #    , "C4": 16, "C5": 19, "C6": 20, "C7": 21, "C8": 26}
 
    def __str__(self):
       return "waveshare8chExpBoard ver: 001"
@@ -106,7 +102,8 @@ class waveshare8chExpBoard(rpiHatBoard, threading.Thread):
          GPIO.output(PIN, INT_STATE)
          # -- -- -- --
          if GPIO.input(PIN) == INT_STATE:
-            print("NEW_PIN_STATE_OK")
+            # print("NEW_PIN_STATE_OK")
+            pass
       except Exception as e:
          print(e)
       finally:

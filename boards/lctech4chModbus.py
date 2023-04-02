@@ -7,11 +7,15 @@ from applib.interfaces.redisHook import redisHook
 from applib.interfaces.modbusBoard import modbusBoard
 from applib.sunclock import sunClock
 from applib.utils import utils
+from boards.buses.modbusBUS import modbusBUS
 
 
 class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
 
-   baudrates = {4800: 0x02, 9600: 0x03, 19200: 0x04}
+   BAUDRATES = {4800: 0x02, 9600: 0x03, 19200: 0x04}
+   ACTIVE_STATE: int = 1
+   ON_OFF_TABLE: {} = {"ON": 1, "OFF": 0}
+   CHNL_PINS: {} = {"CH1": 0, "CH2": 1, "CH3": 2, "CH4": 3}
 
    def __init__(self, xml_id: str
          , red: redis.Redis
@@ -24,11 +28,13 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       self.board_id = self.xml_id.upper()
       self.red: redis.Redis = red
       self.red_sub = self.red.pubsub()
+      self.sun: sunClock = sun
       self.args = args
       ser_port: serial.Serial = serial.Serial()
       modbus_adr: int = 0
       self.red_sub = self.red.pubsub()
       self.red_sbu_thread: threading.Thread = None
+      self.modbus_adr: int = 0
 
    def init(self):
       try:
@@ -74,9 +80,34 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
    def redhook_process_msg(self, redMsg: redisPMsg):
       print(redMsg)
 
+   def __update_redis__(self):
+      upds: [] = []
+      def _oneach(pk):
+         try:
+            chn_id: str = "".join([c for c in pk if c.isdigit()])
+            PIN: int = lctech4chModbus.CHNL_PINS[pk]
+            PIN_VAL: int = self.read_channel(PIN)
+            RED_PIN_KEY: str = utils.pin_redis_key(self.board_id, chn_id)
+            ST: str = f"ON:{PIN_VAL}" if PIN_VAL == lctech4chModbus.ACTIVE_STATE else f"OFF:{PIN_VAL}"
+            d: {} = {"PIN": f"{pk}:{PIN_VAL}", "LAST_STATE": ST
+               , "PIN_ACTIVE_STATE": lctech4chModbus.ACTIVE_STATE
+               , "LAST_STATE_READ_DTS": utils.dts_utc(with_tz=True)}
+            self.red.select(redisDBIdx.DB_IDX_GPIO.value)
+            rv = self.red.hset(RED_PIN_KEY, mapping=d)
+            upds.append(rv)
+         except Exception as e:
+            print(e)
+      # -- -- -- --
+      for _pk in lctech4chModbus.CHNL_PINS.keys():
+         _oneach(_pk)
+      # -- -- -- --
+      buff = ", ".join([str(x) for x in upds])
+      print(f"[ {self.board_id} => redis updates: {buff} ]")
+      # -- -- -- --
+
    def set_channel(self, chnl: int, val: bool):
       data = self.__set_channel_buff__(chnl, val)
-      outbuff = lctech4chModbus.__crc_data__(data)
+      outbuff = lctech4chModbus.crc_data(data)
       super().__send__(outbuff)
       resp: bytearray = super().__read__()
       if resp == outbuff:
@@ -94,16 +125,19 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       if val:
          data: [] = [0x00, 0x0f, 0x00, 0x00, 0x00, 0x08, 0x01, 0xff]
          data[0] = self.modbus_adr
-         outbuff = lctech4chModbus.__crc_data__(bytearray(data))
+         outbuff = lctech4chModbus.crc_data(bytearray(data))
       else:
          data: [] = [0x00, 0x0f, 0x00, 0x00, 0x00, 0x08, 0x01, 0x00]
          data[0] = self.modbus_adr
-         outbuff = lctech4chModbus.__crc_data__(bytearray(data))
+         outbuff = lctech4chModbus.crc_data(bytearray(data))
       # -- send & recv --
       super().__send__(outbuff)
       resp: bytearray = super().__read__()
 
    def read_channel(self, chnl: int):
+      pass
+
+   def write_channel(self, chnl: int, val: int) -> int:
       pass
 
    def set_bus_address(self, old_adr: int, new_adr: int):
@@ -118,7 +152,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       data: () = (0x00, 0x10, 0x00, 0x00, 0x00, 0x01, 0x02, 0x00)
       buff: bytearray = bytearray(data)
       buff.append(self.modbus_adr)
-      outbuff: bytearray = lctech4chModbus.__crc_data__(buff)
+      outbuff: bytearray = lctech4chModbus.crc_data(buff)
       cnt_out: int = self.__send__(outbuff)
       inbuff: bytearray = self.__read__()
       return len(inbuff) == cnt_out
@@ -138,11 +172,11 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
    def ping(ser, modbus_adr):
       data: [] = [0xff, 0x03, 0x03, 0xe8, 0x00, 0x01]
       data[0] = modbus_adr
-      outbuff = lctech4chModbus.__crc_data__(bytearray(data))
+      outbuff = lctech4chModbus.crc_data(bytearray(data))
       mb: modbusBoard = modbusBoard(ser, modbus_adr)
       mb.__send__(outbuff)
       resp: bytearray = mb.__read__()
-      bdr_code = lctech4chModbus.baudrates[ser.baudrate]
+      bdr_code = lctech4chModbus.BAUDRATES[ser.baudrate]
       if (len(resp) > 6) and (resp[4] == bdr_code):
          rval, msg = True, f"GOOD_PONG ON: {ser.port}"
       else:
@@ -151,7 +185,8 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       print(msg)
       return rval
 
-   def __set_channel_buff__(self, relay: int, val: bool) -> [None, bytearray]:
+   def __set_channel_buff__(self, relay: int
+         , val: bool) -> [None, bytearray]:
       """
          (0xff, 0x05, 0x00, 0x00, 0xFF, 0x00)
       """
@@ -170,7 +205,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       return buff
 
    @staticmethod
-   def __crc_data__(data: bytearray):
+   def crc_data(data: bytearray):
       crc_func = mkPredefinedCrcFun("modbus")
       crc_int = crc_func(data)
       crc = crc_int.to_bytes(2, "little")
@@ -183,19 +218,17 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
    # -- -- -- -- -- -- -- -- -- -- -- --
    # threading
    # -- -- -- -- -- -- -- -- -- -- -- --
-
    def run(self) -> None:
       self.__runtime_thread__()
 
    def __refresh_channel__(self):
       pass
 
-   def __update_redis__(self):
-      pass
-
    def __runtime_thread__(self):
       cnt: int = 0
-      while True:
+      # -- -- -- --
+      def __loop():
+         nonlocal cnt
          try:
             time.sleep(4.0)
             if cnt % 4 == 0:
@@ -209,3 +242,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          except Exception as e:
             print(e)
             time.sleep(16.0)
+      # -- -- -- --
+      while True:
+         __loop()
+      # -- -- -- --
