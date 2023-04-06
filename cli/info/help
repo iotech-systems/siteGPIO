@@ -11,8 +11,10 @@
          + export GPIO_BOARD_COMM=9600,8,1,N    baud, bits, stop bits, parity
          + export GPIO_BOARD_ADR=8              modbus address of the board
 
-   3. ex: ./xgpio -set chnl:=2 val:=1 | ./xgpio -set chnl:=X val:=1|0
+   3. ex: ./xgpio -set chnl:=2 val:=0 | ./xgpio -set chnls:=1,2,3,4 val:=1
 
    4. ex: ./xgpio -ping
+
+   5. ex: env | grep GPIO_                      look up what is loaded into ENV
 
 [ ----------------------------------------------------------------------------- ]
