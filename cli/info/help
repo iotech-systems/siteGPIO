@@ -15,6 +15,6 @@
 
    4. ex: ./xgpio -ping
 
-   5. ex: env | grep GPIO_                      look up what is loaded into ENV
+   5. ex: ./xgpio -env                          look up what is loaded into ENV
 
 [ ----------------------------------------------------------------------------- ]
