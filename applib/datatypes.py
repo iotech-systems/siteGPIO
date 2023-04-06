@@ -66,3 +66,47 @@ class redisChnlPinHash(object):
       key = "OFF"
       if key in self._hash.keys():
          self.OFF = self._hash["OFF"]
+
+# - - - - - - - - - - - - - - - - - - - - - - - -
+#
+# - - - - - - - - - - - - - - - - - - - - - - - -
+class commArgs(object):
+
+   def __init__(self, args: str):
+      self.args: str = args
+      self.dev: str = ""
+      self.comm: str = ""
+      self.bus_adr: int = 0
+      self.parseOK: bool = False
+      # -- -- -- --
+      self.br: int = 9600
+      self.par: str = "N"
+      self.bits: int = 8
+      self.__parse__()
+
+   # ";dev:=/run/iotech/dev/modbusPortC;commInfo:=9600,E,8;busAddr:=8;"
+   def __parse__(self):
+      try:
+         # -- -- -- --
+         if self.args[0] != self.args[-1]:
+            return
+         # -- -- -- --
+         tmp: str = self.args[1:-1]
+         arr: [] = tmp.split(";")
+         self.dev = arr[0].replace("dev:=", "")
+         self.comm = arr[1].replace("commInfo:=", "")
+         self.bus_adr: int = int(arr[2].replace("busAddr:=", ""))
+         self.parseOK = True
+      except Exception as e:
+         print(e)
+         self.parseOK = False
+
+   def comm_info(self) -> ():
+      # -- 9600,8,1,N --
+      return self.comm.split(",")
+
+
+class COMMOptTimeout(Exception):
+
+   def __init__(self):
+      super().__init__("COMMOptTimeout")

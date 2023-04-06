@@ -1,2 +1,52 @@
 #!/usr/bin/env python3
 
+import os, sys
+os.chdir("../")
+sys.path.insert(0, os.getcwd())
+from clicore.runGPIO import runGPIO
+os.chdir("cli")
+
+
+def __set(chnl: int, val: int):
+   try:
+      os.system("clear")
+      run_gpio: runGPIO = runGPIO()
+      run_gpio.init()
+      run_gpio.set(chnl, val)
+   except Exception as e:
+      print(e)
+
+def __ping():
+   try:
+      os.system("clear")
+      run_gpio: runGPIO = runGPIO()
+      run_gpio.init()
+      run_gpio.ping()
+   except Exception as e:
+      print(e)
+
+def __help():
+   os.system("clear")
+   with open("info/help") as f:
+      buff = f.read()
+   print(buff)
+
+def main():
+   if len(sys.argv) == 1:
+      __help()
+   if len(sys.argv) == 2 and sys.argv[1] == "-h":
+      __help()
+   if len(sys.argv) == 2 and sys.argv[1] == "-ping":
+      __ping()
+   if len(sys.argv) == 4 and sys.argv[1] == "-set":
+      arg0, arg1 = sys.argv[2:]
+      chl: int = int(arg0.replace("chnl:=", ""))
+      val: int = int(arg1.replace("val:=", ""))
+      __set(chl, val)
+   # -- -- the end -- --
+   print("\n\n")
+
+
+# -- -- -- -- -- -- -- -- -- -- -- --
+if __name__ == "__main__":
+   main()

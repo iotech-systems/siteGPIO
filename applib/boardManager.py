@@ -3,9 +3,10 @@ import threading, typing as t
 import xml.etree.ElementTree as _et
 import redis, configparser as _cp
 from applib.sunclock import sunClock
-from boards.waveshare3chHat import waveshare3chHat
-from boards.waveshare8chExpBoard import waveshare8chExpBoard
-from boards.lctech4chModbus import lctech4chModbus
+# -- import system gpio boards --
+from boards.waveshare.wsh3chHat  import waveshare3chHat
+from boards.waveshare.wsh8chExpBoard import waveshare8chExpBoard
+from boards.lctech.lct4chModbus import lctech4chModbus
 
 
 class boardManager(object):

@@ -6,24 +6,29 @@
       </boards>
    </host>
    <host name="omms-edge-p16">
-      <boards>
-         <board id="devLabLC4r_0" type="lctech4chModbus" args=";addr:=8;comminfo:=9600,E,8;" />
-         <board id="devLabLC4r_1" type="lctech4chModbus" args=";addr:=8;comminfo:=9600,E,8;" />
+      <boards>3
+         <board id="B0T_LabLC4r_A" type="lctech4chModbus"
+                args="dev:=/run/iotech/dev/modbusPortC;commInfo:=9600,8,1,N;busAddr:=8;" />
+         <board id="B0T_LabLC4r_B" type="lctech4chModbus"
+                args="dev:=/run/iotech/dev/modbusPortC;commInfo:=9600,8,1,N;busAddr:=4;" />
       </boards>
    </host>
    <host name="3cpo">
       <boards>
          <board id="devLab3rHat" type="waveshare3chHat" args=";mode:=bcm;" />
          <board id="devLab8r" type="waveshare8chExpBoard" args=";mode:=bcm;" />
-         <board id="devLabModbusLCT4R_A" type="lctech4chModbus" args=";commInfo:=9600,E,8;busAddr:=8;" />
-         <board id="devLabModbusLCT4R_B" type="lctech4chModbus" args=";commInfo:=9600,E,8;busAddr:=10;" />
+         <!-- dev comes from running disco_bot mapping to  -->
+         <board id="devLabModbusLCT4R_A" type="lctech4chModbus"
+                args=";dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=4;" />
+         <board id="devLabModbusLCT4R_B" type="lctech4chModbus"
+                args=";dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=8;" />
       </boards>
    </host>
    <host name="omms-edge-lab">
       <boards>
          <board id="devLab3rHat" type="waveshare3chHat" args=";mode:=bcm;" />
-         <board id="devLabModbusLCT4R_A" type="lctech4chModbus" args=";commInfo:=9600,E,8;busAddr:=8;" />
-         <board id="devLabModbusLCT4R_B" type="lctech4chModbus" args=";commInfo:=9600,E,8;busAddr:=10;" />
+         <board id="devLabModbusLCT4R_A" type="lctech4chModbus"
+                args="dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=8;" />
       </boards>
    </host>
    <host name="lab-rpi0-8r">

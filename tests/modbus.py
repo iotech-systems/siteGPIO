@@ -5,7 +5,7 @@ cwd = os.getcwd()
 os.chdir("../")
 _p = os.getcwd()
 sys.path.insert(0, _p)
-from boards.lctech4chModbus import lctech4chModbus
+from boards.lctech.lctech4chModbus import lctech4chModbus
 
 INI: _cp.ConfigParser = _cp.ConfigParser()
 INI.read("inis/dev_sitegpio.ini")
