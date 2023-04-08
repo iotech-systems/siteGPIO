@@ -119,8 +119,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       # -- -- -- --
 
    def set_channel(self, chnl: int, val: bool):
-      print("\n\t[ set_channel ]")
-      error = 21
+      print(f"\n\t[ set_channel: ({chnl}, {val}) ]")
       # -- -- -- -- -- -- -- --
       def on_0x0(dsent: bytearray) -> bool:
          bval: bool = (dsent == self.comm_port.recv_buff)
@@ -139,8 +138,8 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       for idx in range(0, 1):
          print(f"\t-- SET TRY IDX: {idx}")
          rval: int = self.comm_port.send_receive(bbuff=outbuff)
-         if rval == 0:
-            on_0x0(data)
+         if rval == 0 and on_0x0(data):
+            break
          else:
             print(f"retrying set: {idx}")
             time.sleep(0.2)
