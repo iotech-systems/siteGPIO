@@ -2,15 +2,15 @@
 [ ----------------------------------------------------------------------------- ]
 
    1. export board type:
-         waveshare3r =     export GPIO_BOARD=wsh3r
-         waveshare8r =     export GPIO_BOARD=wsh8r
-         lctech4r    =     export GPIO_BOARD=lct4r
+       + waveshare3r =     export GPIO_BOARD=wsh3r
+       + waveshare8r =     export GPIO_BOARD=wsh8r
+       + lctech4r    =     export GPIO_BOARD=lct4r
 
    2. if "export GPIO_BOARD=lct4r":
-         + export GPIO_BOARD_DEV=/dev/ttyUSBx     os tty_dev or mapped: /opt/iotech/dev/remappedDev
-         + export GPIO_BOARD_COMM=9600,8,1,N      baud, bits, stop bits, parity
-         + export GPIO_BOARD_ADR=8                modbus address of the board
-         + export GPIO_BOARD_SERIAL_DELAY=0.2     delay post write to serial bus
+       + export GPIO_BOARD_DEV=/dev/ttyUSBx     os tty_dev or mapped: /opt/iotech/dev/remappedDev
+       + export GPIO_BOARD_COMM=9600,8,1,N      baud, bits, stop bits, parity
+       + export GPIO_BOARD_ADR=8                modbus address of the board
+       + export GPIO_BOARD_SERIAL_DELAY=0.2     delay post write to serial bus
 
    3. ex: ./xgpio -set chnls:=2 val:=0 | ./xgpio -set chnls:=1,2,3,4 val:=1
 
