@@ -210,7 +210,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
    def ping(self):
       print("\n\t[ ping ]")
       def __on_0(dsent: bytearray):
-         if self.comm_port.recv_buff[0:2] == dsent[0:2]:
+         if self.comm_port.recv_buff[0:1] == dsent[0:1]:
             print("\tGOOD_PONG")
          else:
             print("\tNO_PONG")

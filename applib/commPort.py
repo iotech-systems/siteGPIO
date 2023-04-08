@@ -31,7 +31,6 @@ class commPort(serial.Serial):
          print(f"\tSENT: {bbuff} -> ", end="")
          count = self.write(bbuff)
          self.flush()
-         print(f"POST_WRITE_DELAY: {POST_WRITE_DELAY}")
          time.sleep(POST_WRITE_DELAY)
          if count != len(bbuff):
             raise Exception("BadSendByteCount")

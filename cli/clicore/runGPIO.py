@@ -47,6 +47,8 @@ class runGPIO(object):
    def __init_lct4r__(self):
       print(f"\t\tCOMM:\t{self.comm}")
       print(f"\t\tADDR:\t{self.bus_adr}")
+      x = os.getenv("GPIO_BOARD_SERIAL_DELAY")
+      print(f"\t\tSERIAL_DELAY:\t{x}")
 
    """
       xml_id: str, red: redis.Redis
