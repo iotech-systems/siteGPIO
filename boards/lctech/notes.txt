@@ -51,7 +51,8 @@ remarks:The 4th byte of the Return frame,the Bit0--Bit7 of 0x01 representing rel
 11, Read optocoupler input status
 send:FF 02 00 00 00 08 6C 12
 return :FF 02 01 01 51 A0
-remarks:  The 4th byte of the Return frame, the Bit0--Bit7 of 0x01 represent input signal of optocoupler1- optocoupler 8, 0 represent low level ,1 represent high level
+remarks:  The 4th byte of the Return frame, the Bit0--Bit7 of 0x01 represent input signal
+of optocoupler1- optocoupler 8, 0 represent low level ,1 represent high level
 
 12,Set the baud rate to 4800
 send:FF 10 03 E9 00 01 02 00 02 4A 0C

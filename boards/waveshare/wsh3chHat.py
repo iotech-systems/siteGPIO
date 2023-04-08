@@ -1,4 +1,4 @@
-
+import gc
 import time, redis
 import os, threading
 from applib.utils import utils
@@ -48,9 +48,6 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
       self.red_sbu_thread: threading.Thread = None
       self.sun: sunClock = sun
       self.args = args
-      # -- -- -- -- -- -- --
-      # self.ON_OFF_TABLE: {} = {"ON": 0, "OFF": 1}
-      # self.CHNL_PINS: {} = {"C1": 26, "C2": 20, "C3": 21}
 
    def init(self, GPIO_MODE: int = GPIO.BCM) -> bool:
       try:
@@ -75,11 +72,14 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
          # -- -- -- -- -- -- -- --
          redis_patt: str = f"{self.board_id}*"
          self.red_sub.psubscribe(**{redis_patt: self.redhook_on_msg})
-         self.red_sbu_thread: threading.Thread = \
-            self.red_sub.run_in_thread(sleep_time=0.01)
-         self.red_sbu_thread.name = self.xml_id
+         self.__create_red_eventing_thread__()
+         # self.red_sbu_thread: threading.Thread = \
+         #    self.red_sub.run_in_thread(sleep_time=0.100, exception_handler=self.__on_red_exception__)
+         # self.red_sbu_thread.name = self.xml_id
+         # # -- -- -- -- -- -- -- --
          if not self.red_sbu_thread.is_alive():
             self.red_sbu_thread.start()
+         # -- -- -- -- -- -- -- --
          return True
       except Exception as e:
          print(e)
@@ -134,6 +134,23 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
    # -- -- -- -- -- -- -- --
    def run(self) -> None:
       self.__runtime_thread__()
+
+   def __create_red_eventing_thread__(self):
+      self.red_sbu_thread = None
+      self.red_sbu_thread: threading.Thread = \
+         self.red_sub.run_in_thread(sleep_time=0.100, exception_handler=self.__on_red_exception__)
+      self.red_sbu_thread.name = self.xml_id
+
+   def __on_red_exception__(self, e, pubsub, src):
+      print("[ __on_red_exception__ ]")
+      try:
+         gc.collect()
+         self.__create_red_eventing_thread__()
+      except Exception as e:
+         print(e)
+
+   def __check_red_thread__(self):
+      pass
 
    def __update_redis__(self):
       upds: [] = []
@@ -198,6 +215,7 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
             if cnt == 8:
                print(f"[ board_thread : {self} ]")
                self.__update_redis__()
+               self.__check_red_thread__()
                cnt = 0
             # -- -- -- --
             cnt += 1
