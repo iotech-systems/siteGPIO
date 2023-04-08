@@ -25,8 +25,8 @@ class commPort(serial.Serial):
          print(se)
 
    def send_receive(self, bbuff: bytearray) -> int:
-      t = os.getenv("POST_WRITE_DELAY")
-      POST_WRITE_DELAY: float = float(t) if (t in [None, ""]) else 0.020
+      t = os.getenv("GPIO_BOARD_SERIAL_DELAY")
+      POST_WRITE_DELAY: float = float(t) if (t not in [None, ""]) else 0.020
       try:
          print(f"\tSENT: {bbuff} -> ", end="")
          count = self.write(bbuff)
