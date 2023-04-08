@@ -144,8 +144,8 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
    def __on_red_exception__(self, e, pubsub, src):
       print("[ __on_red_exception__ ]")
       try:
-         gc.collect()
          self.__create_red_eventing_thread__()
+         gc.collect()
       except Exception as e:
          print(e)
 
@@ -192,12 +192,10 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
             PIN: int = self.CHNL_PINS[f"C{red_hash.BOARD_CHANNEL}"]
             CURR_STATE = int(GPIO.input(PIN))
             if CURR_STATE == NEW_INT_STATE:
-               # print(f"NO_STATE_UPDATED_NEEDED:: CS - {CURR_STATE} : NIT - {NEW_INT_STATE}")
                return
             GPIO.output(PIN, NEW_INT_STATE)
             # -- -- -- --
             if GPIO.input(PIN) == NEW_INT_STATE:
-               # print(f"NEW_PIN_STATE_OK: {NEW_INT_STATE}")
                pass
          except Exception as e:
             print(e)
