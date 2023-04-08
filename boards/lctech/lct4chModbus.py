@@ -136,7 +136,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       for idx in range(0, 1):
          data = self.__set_channel_buff__(chnl, val)
          outbuff = lctech4chModbus.crc_data(data)
-         print(f" -- SET TRY IDX: {idx}")
+         print(f"\t-- SET TRY IDX: {idx}")
          rval: int = self.comm_port.send_receive(bbuff=outbuff)
          if rval == 0:
             on_0x0(data)
