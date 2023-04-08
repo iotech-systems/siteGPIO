@@ -1,3 +1,4 @@
+import os
 import time
 
 import serial, threading
@@ -24,11 +25,13 @@ class commPort(serial.Serial):
          print(se)
 
    def send_receive(self, bbuff: bytearray) -> int:
-      POST_WRITE_DELAY: float = 0.025
+      t = os.getenv("POST_WRITE_DELAY")
+      POST_WRITE_DELAY: float = float(t) if (t in [None, ""]) else 0.020
       try:
          print(f"\tSENT: {bbuff} -> ", end="")
          count = self.write(bbuff)
          self.flush()
+         print(f"POST_WRITE_DELAY: {POST_WRITE_DELAY}")
          time.sleep(POST_WRITE_DELAY)
          if count != len(bbuff):
             raise Exception("BadSendByteCount")

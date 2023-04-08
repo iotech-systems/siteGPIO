@@ -19,7 +19,7 @@ def __set(chnls: [], val: int):
          if not ch.isdigit():
             continue
          run_gpio.set(int(ch), val)
-         time.sleep(0.332)
+         time.sleep(0.480)
    except Exception as e:
       print(e)
 
