@@ -24,7 +24,7 @@ class commPort(serial.Serial):
          print(se)
 
    def send_receive(self, bbuff: bytearray) -> int:
-      POST_WRITE_DELAY: float = 0.02
+      POST_WRITE_DELAY: float = 0.025
       try:
          print(f"\tSENT: {bbuff} -> ", end="")
          count = self.write(bbuff)
@@ -50,7 +50,7 @@ class commPort(serial.Serial):
             self.recv_buff.extend(self.read(1))
             if self.in_waiting == 0:
                cnt += 1
-               if cnt <= 10:
+               if cnt <= 12:
                   continue
                else:
                   break

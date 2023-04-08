@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, sys, sh
+import os, sys
 import time, subprocess
 
 os.chdir("../")
