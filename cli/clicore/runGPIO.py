@@ -15,7 +15,7 @@ class runGPIO(object):
       self.dev: str = os.getenv("GPIO_BOARD_DEV")
       self.comm: str = os.getenv("GPIO_BOARD_COMM")
       self.bus_adr: str = os.getenv("GPIO_BOARD_ADR")
-      tmp = os.getenv("GPIO_BOARD_DELAY")
+      tmp = os.getenv("GPIO_BOARD_SERIAL_DELAY")
       runGPIO.POST_WRITE_DELAY = float(tmp) if (tmp not in [None, ""]) else 0.100
 
    def init(self):
