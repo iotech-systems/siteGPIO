@@ -8,11 +8,15 @@ from boards.waveshare.wsh8chExpBoard import waveshare8chExpBoard
 
 class runGPIO(object):
 
+   POST_WRITE_DELAY: float = 0.100
+
    def __init__(self):
       self.board: str = os.getenv("GPIO_BOARD")
       self.dev: str = os.getenv("GPIO_BOARD_DEV")
       self.comm: str = os.getenv("GPIO_BOARD_COMM")
       self.bus_adr: str = os.getenv("GPIO_BOARD_ADR")
+      tmp = os.getenv("GPIO_BOARD_DELAY")
+      runGPIO.POST_WRITE_DELAY = float(tmp) if (tmp not in [None, ""]) else 0.100
 
    def init(self):
       print(f"\n\t[ running: gpio ]\n")
