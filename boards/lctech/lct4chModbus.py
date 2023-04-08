@@ -122,25 +122,30 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       print("\n\t[ set_channel ]")
       error = 21
       # -- -- -- -- -- -- -- --
-      def on_ok(dsent: bytearray):
+      def on_0x0(dsent: bytearray) -> bool:
          bval: bool = (dsent == self.comm_port.recv_buff)
          msg: str = "\t\tSET_OK" if bval else "\t\tSET_ERROR"
          print(msg)
+         return bval
       # -- -- -- -- -- -- -- --
       # chnls come in as 1-4 by need to be moved to 0-3
       chnl = (chnl - 1)
       if chnl not in range(0, 4):
          print(f"BadChnlID: {chnl}")
          return
-      data = self.__set_channel_buff__(chnl, val)
-      outbuff = lctech4chModbus.crc_data(data)
-      rval: int = self.comm_port.send_receive(bbuff=outbuff)
-      if rval == 0:
-         on_ok(data)
-      elif rval == error:
-         pass
-      else:
-         pass
+      for idx in range(0, 1):
+         data = self.__set_channel_buff__(chnl, val)
+         outbuff = lctech4chModbus.crc_data(data)
+         print(f" -- SET TRY IDX: {idx}")
+         rval: int = self.comm_port.send_receive(bbuff=outbuff)
+         if rval == 0:
+            on_0x0(data)
+         elif rval == error:
+            print(f"retrying set: {idx}")
+            time.sleep(0.2)
+            continue
+         else:
+            pass
 
    def set_all_channels(self, val: bool):
       """
