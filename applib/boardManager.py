@@ -26,22 +26,29 @@ class boardManager(object):
       _boards: t.List[_et.Element] = self.xml.findall("boards/board")
       # -- oneach call --
       def _oneach(e: _et.Element) -> threading.Thread:
-         _id = e.attrib["id"]; _args = e.attrib["args"]
+         # -- -- -- ---
+         _id = e.attrib["id"]
+         _args = e.attrib["args"]
          _type = e.attrib["type"]
+         # -- -- -- ---
          if _type == "waveshare3chHat":
             board: waveshare3chHat = \
                waveshare3chHat(xml_id=_id, red=self.red, sun=self.sun, args=_args)
             board.init()
             return board
+         # -- -- -- ---
          elif _type == "waveshare8chExpBoard":
             board: waveshare8chExpBoard = \
                waveshare8chExpBoard(xid=_id, red=self.red, sun=self.sun, args=_args)
             board.init()
             return board
+         # -- -- -- ---
          elif _type == "lctech4chModbus":
-            board: lctech4chModbus = lctech4chModbus(xml_id=_id, red=self.red, sun=self.sun, args=_args)
+            board: lctech4chModbus = \
+               lctech4chModbus(xml_id=_id, red=self.red, sun=self.sun, args=_args)
             board.init()
             return board
+         # -- -- -- ---
          else:
             raise Exception(f"BadBoardType: {_type}")
       # -- create list --

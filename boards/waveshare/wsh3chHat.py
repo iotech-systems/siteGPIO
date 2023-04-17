@@ -73,9 +73,6 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
          redis_patt: str = f"{self.board_id}*"
          self.red_sub.psubscribe(**{redis_patt: self.redhook_on_msg})
          self.__create_red_eventing_thread__()
-         # self.red_sbu_thread: threading.Thread = \
-         #    self.red_sub.run_in_thread(sleep_time=0.100, exception_handler=self.__on_red_exception__)
-         # self.red_sbu_thread.name = self.xml_id
          # # -- -- -- -- -- -- -- --
          if not self.red_sbu_thread.is_alive():
             self.red_sbu_thread.start()
@@ -175,7 +172,6 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
       # -- -- -- --
 
    def __refresh_channel__(self):
-      # update board pin states
       def _on_each(pk):
          try:
             chn_id: str = pk.replace("C", "")

@@ -1,15 +1,14 @@
 
 from crcmod.predefined import *
 import os, threading, time, redis
-import serial, xml.etree.ElementTree as _et
 from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
 from applib.interfaces.redisHook import redisHook
 from applib.interfaces.modbusBoard import modbusBoard
+from applib.channelPinDriver import channelPinDriver
 from applib.sunclock import sunClock
 from applib.utils import utils
 from applib.datatypes import commArgs
 from applib.commPort import commPort
-from boards.buses.modbusBUS import modbusBUS
 
 
 class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
@@ -40,17 +39,13 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          pass
       self.red_sbu_thread: threading.Thread = None
       self.bus_adr: int = self.comm_args.bus_adr
-      # -- 9600,8,1,N --
-      br, bts, sbt, par = self.comm_args.comm_info()
-      # self.comm_port: serial.Serial = \
-      # serial.Serial(baudrate=int(br), parity=par, stopbits=int(sbt))
-      # -- -- -- --
-      self.comm_port: commPort = \
-         commPort(dev=self.comm_args.dev, baud=int(br), bsize=int(bts), sbits=int(sbt), parity=par)
-      # -- -- -- --
+      self.comm_port: commPort = None
 
    def init(self):
       try:
+         # -- -- -- -- -- -- -- --
+         if not os.path.exists(self.comm_args.dev):
+            raise FileNotFoundError(self.comm_args.dev)
          # -- -- -- -- -- -- -- --
          if not self.red.ping():
             raise Exception("NoRedPong")
@@ -68,11 +63,16 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          redis_patt: str = f"{self.board_id}*"
          self.red_sub.psubscribe(**{redis_patt: self.redhook_on_msg})
          self.red_sbu_thread: threading.Thread = \
-            self.red_sub.run_in_thread(sleep_time=0.001)
+            self.red_sub.run_in_thread(sleep_time=0.01)
          self.red_sbu_thread.name = self.xml_id
+         # -- -- -- -- -- -- -- --
          if not self.red_sbu_thread.is_alive():
             self.red_sbu_thread.start()
          return True
+      except FileNotFoundError as e:
+         # -- ttydev not found --
+         print(e)
+         return False
       except Exception as e:
          print(e)
          return False
@@ -91,7 +91,33 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          print(e)
 
    def redhook_process_msg(self, redMsg: redisPMsg):
-      print(redMsg)
+      """
+         create serial port only when the msgs comes in
+      """
+      try:
+         # -- -- -- --
+         print(redMsg)
+         # -- load red hash --
+         self.red.select(redisDBIdx.DB_IDX_GPIO.value)
+         CHNL_PIN_KEY = redMsg.data.strip()
+         _hash = self.red.hgetall(CHNL_PIN_KEY)
+         red_hash: redisChnlPinHash = redisChnlPinHash(_hash)
+         chn_pin_driver: channelPinDriver = \
+            channelPinDriver(red_hash, self.sun, lctech4chModbus.ON_OFF_TABLE["ON"])
+         # -- -- -- --
+         br, bts, sbt, par = self.comm_args.comm_info()
+         self.comm_port: commPort = \
+            commPort(dev=self.comm_args.dev, baud=int(br), bsize=int(bts), sbits=int(sbt), parity=par)
+         # -- -- -- --
+         STATE: str = chn_pin_driver.get_state()
+         INT_STATE: int = lctech4chModbus.ON_OFF_TABLE[STATE]
+         PIN: int = lctech4chModbus.CHNL_PINS[f"CH{(red_hash.BOARD_CHANNEL + 1)}"]
+         self.set_channel(PIN, bool(INT_STATE))
+         self.comm_port.close()
+      except Exception as e:
+         print(e)
+      finally:
+         pass
 
    def __update_redis__(self):
       upds: [] = []
@@ -119,15 +145,15 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       # -- -- -- --
 
    def set_channel(self, chnl: int, val: bool):
-      print(f"\n\t[ set_channel: {chnl} | val: {val} ]")
+      PIN: int = lctech4chModbus.CHNL_PINS[f"CH{chnl}"]
+      print(f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {val} ]")
       # -- -- -- -- -- -- -- --
-      def on_0x0(dsent: bytearray) -> bool:
+      def on_rval_0(dsent: bytearray) -> bool:
          bval: bool = (dsent == self.comm_port.recv_buff)
          msg: str = "\t\tSET_OK" if bval else "\t\tSET_ERROR"
          print(msg)
          return bval
       # -- -- -- -- -- -- -- --
-      # chnls come in as 1-4 by need to be moved to 0-3
       chnl = (chnl - 1)
       if chnl not in range(0, 4):
          print(f"BadChnlID: {chnl}")
@@ -135,10 +161,14 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       data = self.__set_channel_buff__(chnl, val)
       outbuff = lctech4chModbus.crc_data(data)
       # -- -- -- -- -- -- -- --
+      br, bts, sbt, par = self.comm_args.comm_info()
+      self.comm_port: commPort = \
+         commPort(dev=self.comm_args.dev, baud=int(br), bsize=int(bts), sbits=int(sbt), parity=par)
+      # -- -- -- -- -- -- -- --
       for idx in range(0, 2):
          print(f"\t-- SET TRY IDX: {idx}")
          rval: int = self.comm_port.send_receive(bbuff=outbuff)
-         if rval == 0 and on_0x0(data):
+         if rval == 0 and on_rval_0(data):
             break
          else:
             print(f"\tretrying set: {idx}")
@@ -146,73 +176,76 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             continue
       # -- -- -- -- -- -- -- --
 
-   def set_all_channels(self, val: bool):
-      """
-         5, turn on all relay
-         send :FF 0F 00 00 00 08 01 FF 30 1D
-         return :FF 0F 00 00 00 08 41 D3
-         6,turn off all relay
-         send:FF 0F 00 00 00 08 01 00 70 5D
-         return :FF 0F 00 00 00 08 41 D3
-      """
-      if val:
-         data: [] = [0x00, 0x0f, 0x00, 0x00, 0x00, 0x08, 0x01, 0xff]
-         data[0] = self.modbus_adr
-         outbuff = lctech4chModbus.crc_data(bytearray(data))
-      else:
-         data: [] = [0x00, 0x0f, 0x00, 0x00, 0x00, 0x08, 0x01, 0x00]
-         data[0] = self.modbus_adr
-         outbuff = lctech4chModbus.crc_data(bytearray(data))
-      # -- send & recv --
-      super().__send__(outbuff)
-      resp: bytearray = super().__read__()
+   # def set_all_channels(self, val: bool):
+   #    """
+   #       5, turn on all relay
+   #       send :FF 0F 00 00 00 08 01 FF 30 1D
+   #       return :FF 0F 00 00 00 08 41 D3
+   #       6,turn off all relay
+   #       send:FF 0F 00 00 00 08 01 00 70 5D
+   #       return :FF 0F 00 00 00 08 41 D3
+   #    """
+   #    if val:
+   #       data: [] = [0x00, 0x0f, 0x00, 0x00, 0x00, 0x08, 0x01, 0xff]
+   #       data[0] = self.modbus_adr
+   #       outbuff = lctech4chModbus.crc_data(bytearray(data))
+   #    else:
+   #       data: [] = [0x00, 0x0f, 0x00, 0x00, 0x00, 0x08, 0x01, 0x00]
+   #       data[0] = self.modbus_adr
+   #       outbuff = lctech4chModbus.crc_data(bytearray(data))
+   #    # -- send & recv --
+   #    super().__send__(outbuff)
+   #    resp: bytearray = super().__read__()
 
-   def read_channel(self, chnl: int):
-      pass
+   def read_channel(self, chnl: int) -> int:
+      return 1
 
    def write_channel(self, chnl: int, val: int) -> int:
-      pass
+      return 1
 
    def set_bus_address(self, old_adr: int, new_adr: int):
-      """
-         Set the device address to 1
+      """ Set the device address to 1
             00 10 00 00 00 01 02 00 01 6A 00
          Set the device address to 255
             00 10 00 00 00 01 02 00 FF EB 80
          The 9th byte of the sending frame, 0xFF, is the written device address
-      """
-      # data: () = (0x00, 0x10, 0x00, 0x00, 0x00, 0x01, 0x02, 0x00)
-      # buff: bytearray = bytearray(data)
-      # buff.append(self.modbus_adr)
-      # outbuff: bytearray = lctech4chModbus.crc_data(buff)
-      # cnt_out: int = self.__send__(outbuff)
-      # inbuff: bytearray = self.__read__()
-      # return len(inbuff) == cnt_out
-      pass
+         00 10 00 00 00 01 02 00 FF """
+      data: [] = [old_adr, 0x10, 0x00, 0x00, 0x00, 0x01, 0x02, 0x00, new_adr]
+      buff: bytearray = bytearray(data)
+      outbuff: bytearray = lctech4chModbus.crc_data(buff)
+      br, bts, sbt, par = self.comm_args.comm_info()
+      self.comm_port: commPort = \
+         commPort(dev=self.comm_args.dev, baud=int(br), bsize=int(bts), sbits=int(sbt), parity=par)
+      rval = self.comm_port.send_receive(outbuff)
+      print(f"\tRVAL: {rval}")
+      if buff == self.comm_port.recv_buff:
+         print(f"\tNew MODBUS address set to: {new_adr}")
+      else:
+         print("\tMODBUS address NOT SET!")
 
-   """
-      10,read device address
+   """ 10,read device address
       send   : FF 01 00 00 00 08 28 12
-      return : FF 01 01 01 A1 A0
-   """
+      return : FF 01 01 01 A1 A0 """
    def read_bus_address(self):
       print("[ read_bus_address ]")
-      # FF 01 00 00 00 08
       data: [] = [None, 0x01, 0x00, 0x00, 0x00, 0x08]
       data[0] = self.bus_adr
       outbuff = lctech4chModbus.crc_data(bytearray(data))
       snd_recv_val = self.comm_port.send_receive(outbuff)
       print(snd_recv_val)
 
-   """
-      15,Read the baud rate
+   """ 15,Read the baud rate
          send   : FF 03 03 E8 00 01 11 A4
          return : FF 03 02 00 04 90 53
       remarks：The 5th byte of the Return 
-         frame represent read baud rate, 0x02, 0x03, x04 represents 4800,9600,19200.
-   """
+         frame represent read baud rate, 0x02, 0x03, x04 represents 4800,9600,19200. """
    def ping(self):
+      # -- -- -- --
       print("\n\t[ ping ]")
+      br, bts, sbt, par = self.comm_args.comm_info()
+      self.comm_port: commPort = \
+         commPort(dev=self.comm_args.dev, baud=int(br), bsize=int(bts), sbits=int(sbt), parity=par)
+      # -- -- -- --
       def __on_0(dsent: bytearray):
          if self.comm_port.recv_buff[0:1] == dsent[0:1]:
             print("\tGOOD_PONG")

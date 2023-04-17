@@ -8,9 +8,9 @@
    <host name="omms-edge-p16">
       <boards>3
          <board id="B0T_LabLC4r_A" type="lctech4chModbus"
-                args="dev:=/run/iotech/dev/modbusPortC;commInfo:=9600,8,1,N;busAddr:=8;" />
+                args="dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=8;" />
          <board id="B0T_LabLC4r_B" type="lctech4chModbus"
-                args="dev:=/run/iotech/dev/modbusPortC;commInfo:=9600,8,1,N;busAddr:=4;" />
+                args="dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=4;" />
       </boards>
    </host>
    <host name="3cpo">
@@ -19,9 +19,9 @@
          <board id="devLab8r" type="waveshare8chExpBoard" args=";mode:=bcm;" />
          <!-- dev comes from running disco_bot mapping to  -->
          <board id="devLabModbusLCT4R_A" type="lctech4chModbus"
-                args=";dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=4;" />
+                args=";dev:=/dev/ttyUSB0;comm:=9600,8,1,N;busAddr:=4;" />
          <board id="devLabModbusLCT4R_B" type="lctech4chModbus"
-                args=";dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=8;" />
+                args=";dev:=/dev/ttyUSB0;comm:=9600,8,1,N;busAddr:=8;" />
       </boards>
    </host>
    <host name="omms-edge-lab">

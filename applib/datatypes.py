@@ -84,7 +84,7 @@ class commArgs(object):
       self.bits: int = 8
       self.__parse__()
 
-   # ";dev:=/run/iotech/dev/modbusPortC;commInfo:=9600,E,8;busAddr:=8;"
+   # ";dev:=/run/iotech/dev/modbusPortC;comm:=9600,E,8;busAddr:=8;"
    def __parse__(self):
       try:
          # -- -- -- --
@@ -94,7 +94,7 @@ class commArgs(object):
          tmp: str = self.args[1:-1]
          arr: [] = tmp.split(";")
          self.dev = arr[0].replace("dev:=", "")
-         self.comm = arr[1].replace("commInfo:=", "")
+         self.comm = arr[1].replace("comm:=", "")
          self.bus_adr: int = int(arr[2].replace("busAddr:=", ""))
          self.parseOK = True
       except Exception as e:

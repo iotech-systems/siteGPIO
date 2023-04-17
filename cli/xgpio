@@ -2,7 +2,6 @@
 
 import os, sys
 import time, subprocess
-
 os.chdir("../")
 sys.path.insert(0, os.getcwd())
 from clicore.runGPIO import runGPIO
@@ -47,6 +46,33 @@ def __env():
    print("\n\t[ env ]\n")
    _ = [print(f"\t\t{xl}") for xl in lns if xl.startswith("GPIO_")]
 
+
+"""
+   GPIO_BOARD_ADR=8; GPIO_BOARD=lct4r
+"""
+def __set_mb_adr(new_adr: int):
+   board: str = os.getenv("GPIO_BOARD")
+   if board != "lct4r":
+      print(f"\n\t[ BAD_BOARD_SELECTED: {board} ]\n")
+      exit(0)
+   # old_mb_adr: int = int(os.getenv("GPIO_BOARD_ADR"))
+   old_mb_adr: int = 0x00
+   os.system("clear")
+   print("\n\t[ CHANGE MODBUS ADDRESS ]")
+   print(f"\n\tChanging MB address from: {old_mb_adr} -> to: {new_adr}")
+   msg = "\tREADME: This will BROADCAST address change to ALL devices on the BUS!\n" \
+      "\t + Make sure this is the ONLY device connected to the BUS!"
+   print(msg)
+   dev = os.getenv("GPIO_BOARD_DEV")
+   print(f"\tttyDev: {dev}")
+   print(f"\tBoard: {board}")
+   ans = input("\tContinue y/n ? : ")
+   if ans.upper() == "Y":
+      run_gpio: runGPIO = runGPIO()
+      run_gpio.lct4r_set_md_adr(old_mb_adr, new_adr)
+   else:
+      print("no")
+
 def main():
    if len(sys.argv) == 1:
       __help()
@@ -56,6 +82,9 @@ def main():
       __env()
    if len(sys.argv) == 2 and sys.argv[1] == "-ping":
       __ping()
+   if len(sys.argv) == 3 and sys.argv[1] == "-set-mb-adr":
+      new_adr = sys.argv[2]
+      __set_mb_adr(int(new_adr))
    if len(sys.argv) == 4 and sys.argv[1] == "-set":
       arg0, arg1 = sys.argv[2:]
       chls: [] = arg0.replace("chnls:=", "").split(",")

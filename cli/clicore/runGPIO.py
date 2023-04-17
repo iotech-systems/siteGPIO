@@ -57,17 +57,24 @@ class runGPIO(object):
    """
    def __set_lct4r__(self, chnl, val):
       print("\n\t[ __set_lct4r__ ]")
-      args = f";dev:={self.dev};commInfo:={self.comm};busAddr:={self.bus_adr};"
+      args = f";dev:={self.dev};comm:={self.comm};busAddr:={self.bus_adr};"
       print(f"\targs={args}")
       board: lctech4chModbus = lctech4chModbus(xml_id="CLI", args=args)
       board.set_channel(chnl=chnl, val=val)
 
    def __ping_lct4r__(self):
       print("\n\t[ __ping_lct4r__ ]")
-      args = f";dev:={self.dev};commInfo:={self.comm};busAddr:={self.bus_adr};"
+      args = f";dev:={self.dev};comm:={self.comm};busAddr:={self.bus_adr};"
       print(f"\targs={args}")
       board: lctech4chModbus = lctech4chModbus(xml_id="CLI", args=args)
       board.ping()
+
+   def lct4r_set_md_adr(self, old_mb_adr, new_adr):
+      print("\n\t[ __set_md_adr_lct4r__ ]")
+      args = f";dev:={self.dev};comm:={self.comm};busAddr:={self.bus_adr};"
+      print(f"\targs={args}")
+      board: lctech4chModbus = lctech4chModbus(xml_id="CLI", args=args)
+      board.set_bus_address(old_mb_adr, new_adr)
 
    def __init_wsh3r__(self):
       print("__init_wsh3r__")
