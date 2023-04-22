@@ -74,6 +74,9 @@ def __set_mb_adr(new_adr: int):
       print("no")
 
 def main():
+   # -- -- -- --
+   load_default_env()
+   # -- -- -- --
    if len(sys.argv) == 1:
       __help()
    if len(sys.argv) == 2 and sys.argv[1] == "-h":
@@ -92,6 +95,14 @@ def main():
       __set(chls, val)
    # -- -- the end -- --
    print("\n\n")
+
+def load_default_env():
+   var = os.environ.get("GPIO_BOARD_COMM")
+   if var is None:
+      os.environ.setdefault("GPIO_BOARD_COMM", "9600,8,1,N")
+   var = os.environ.get("GPIO_BOARD_SERIAL_DELAY")
+   if var is None:
+      os.environ.setdefault("GPIO_BOARD_SERIAL_DELAY", "0.2")
 
 
 # -- -- -- -- -- -- -- -- -- -- -- --
