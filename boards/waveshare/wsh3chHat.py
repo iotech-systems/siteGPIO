@@ -197,7 +197,7 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
             if CURR_STATE == NEW_INT_STATE:
                return
             GPIO.output(PIN, NEW_INT_STATE)
-            print(f"\t[ wsh3chHat: {self.xml_id} | new state | {CURR_STATE} -> {NEW_INT_STATE} ]")
+            print(f"\t[ wsh3chHat: {self.xml_id} | {pk} | new state | {CURR_STATE} -> {NEW_INT_STATE} ]")
             # -- -- -- --
             if GPIO.input(PIN) == NEW_INT_STATE:
                pass
