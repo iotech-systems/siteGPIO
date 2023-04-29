@@ -1,6 +1,6 @@
 
 import abc, time, serial
-
+from serial import Serial
 
 class modbusBoard(object):
 
@@ -8,34 +8,8 @@ class modbusBoard(object):
 
    def __init__(self, **kwargs):
       self.args = kwargs["args"]
-      # self.dev_port: serial.Serial = kwargs["dev_port"]
-      # self.modbus_adr: int = kwargs["mb_adr"]
 
-   # def set_channel(self, chnl: int, val: bool):
-   #    pass
-   #
-   # def set_all_channels(self, val: bool):
-   #    pass
-   #
-   # @abc.abstractmethod
-   # def read_channel(self, chnl: int) -> int:
-   #    pass
-
-   # @abc.abstractmethod
-   # def write_channel(self, chnl: int, val: int) -> int:
-   #    pass
-   #
-   # def set_bus_address(self, old_adr: int, new_adr: int):
-   #    pass
-   #
-   # def read_bus_address(self, old_adr: int):
-   #    pass
-   #
-   # @abc.abstractmethod
-   # def ping(self) -> bool:
-   #    pass
-
-   def __comm_port__(self) -> serial.Serial:
+   def __comm_port__(self) -> Serial:
       if not self.ser_port.isOpen():
          self.ser_port.open()
       return self.ser_port
