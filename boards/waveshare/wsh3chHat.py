@@ -116,17 +116,20 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
          # -- -- -- --
          strSTATE: str = chn_pin_driver.get_state()
          intSTATE: int = self.ON_OFF_TABLE[strSTATE]
-         PIN: int = self.CHNL_PINS[f"C{red_hash.BOARD_CHANNEL}"]
+         b_chnl: str = f"C{red_hash.BOARD_CHANNEL}"
+         PIN: int = self.CHNL_PINS[b_chnl]
          # -- -- -- --
          oldSTATE: int = GPIO.input(PIN)
          if oldSTATE == intSTATE:
-            print(f"\t[ wsh3chHat: {self.xml_id} | no state change needed ]")
+            print(f"\t[ wsh3chHat: {self.xml_id} | NoStateChangeNeeded ]")
             return
          # -- -- -- --
-         print(f"\t[ wsh3chHat: {self.xml_id} | state change needed ]")
+         print(f"\t[ wsh3chHat: {self.xml_id} | StateChangeNeeded ]")
          GPIO.output(PIN, intSTATE)
          state_chng: bool = (GPIO.input(PIN) == intSTATE)
-         print(f"\t -> STATE_CHANGE: {state_chng} | {red_hash.CHANNEL_NAME} | {oldSTATE} -> {intSTATE}")
+         msg: str = f"\t -> STATE_CHANGE: {state_chng} | {b_chnl}"\
+            f" | {red_hash.CHANNEL_NAME} | {oldSTATE} -> {intSTATE}"
+         print(msg)
          # -- -- -- --
       except Exception as e:
          print(e)
