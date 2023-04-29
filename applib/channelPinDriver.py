@@ -57,6 +57,8 @@ class channelPinDriver(object):
       return _on if state else _off
 
    def __is_good_input__(self):
+      if self.red_hash.ON in [None, ""]:
+         return False
       onHH, onMM = self.red_hash.ON.split(":")
       timeOn = f"{onHH}:{onMM}"
       offHH, offMM = self.red_hash.OFF.split(":")
