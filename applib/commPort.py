@@ -46,16 +46,12 @@ class commPort(serial.Serial):
    def __receive__(self) -> bool:
       try:
          cnt: int = 0
-         self.timeout = 0.04
          self.recv_buff.clear()
+         self.timeout = 0.200
          while True:
             self.recv_buff.extend(self.read(1))
             if self.in_waiting == 0:
-               cnt += 1
-               if cnt <= 12:
-                  continue
-               else:
-                  break
+               break
          # -- -- -- --
          print(f"\tRECV: {self.recv_buff} -> OK")
          # -- -- -- --
