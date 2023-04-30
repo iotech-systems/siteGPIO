@@ -117,7 +117,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          self.set_channel(PIN, bool(INT_STATE))
          self.comm_port.close()
       except Exception as e:
-         print(e)
+         print(f"e: {e}")
       finally:
          pass
 
