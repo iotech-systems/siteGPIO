@@ -300,7 +300,26 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       self.__runtime_thread__()
 
    def __refresh_channel__(self):
-      pass
+      def _on_each(pk):
+         try:
+            chn_id: str = pk.replace("CH", "")
+            # PIN: int = lctech4chModbus.CHNL_PINS[pk]
+            RED_PIN_KEY: str = utils.pin_redis_key(self.board_id, chn_id)
+            self.red.select(redisDBIdx.DB_IDX_GPIO.value)
+            _hash = self.red.hgetall(RED_PIN_KEY)
+            red_hash: redisChnlPinHash = redisChnlPinHash(_hash)
+            chn_pin_driver: channelPinDriver = \
+               channelPinDriver(red_hash, self.sun, self.ON_OFF_TABLE["ON"])
+            # -- -- -- --
+            STATE: str = chn_pin_driver.get_state()
+            NEW_INT_STATE: int = self.ON_OFF_TABLE[STATE]
+            self.set_channel(pk, bool(NEW_INT_STATE))
+            # -- -- -- --
+         except Exception as e:
+            print(e)
+         # -- -- -- --
+      for _pk in lctech4chModbus.CHNL_PINS.keys():
+         _on_each(_pk)
 
    def __runtime_thread__(self):
       cnt: int = 0
