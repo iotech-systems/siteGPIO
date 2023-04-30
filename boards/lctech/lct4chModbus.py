@@ -313,7 +313,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             # -- -- -- --
             STATE: str = chn_pin_driver.get_state()
             NEW_INT_STATE: int = self.ON_OFF_TABLE[STATE]
-            self.set_channel(chn_id, bool(NEW_INT_STATE))
+            self.set_channel(int(chn_id), bool(NEW_INT_STATE))
             # -- -- -- --
          except Exception as e:
             print(e)
