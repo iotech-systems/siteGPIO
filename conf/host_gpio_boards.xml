@@ -9,10 +9,10 @@
       <boards>
          <!-- lights outside -->
          <board id="gpioP16_0" type="lctech4chModbus"
-            args=";dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=8;" />
+            args=";dev:=/dev/ttyUSB2;comm:=9600,8,1,N;busAddr:=8;" />
          <!-- stairway B -->
          <board id="gpioP16_1" type="lctech4chModbus"
-            args=";dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=4;" />
+            args=";dev:=/dev/ttyUSB2;comm:=9600,8,1,N;busAddr:=4;" />
       </boards>
    </host>
    <host name="omms-edge-p7">

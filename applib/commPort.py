@@ -45,7 +45,6 @@ class commPort(serial.Serial):
 
    def __receive__(self) -> bool:
       try:
-         cnt: int = 0
          self.recv_buff.clear()
          self.timeout = 0.200
          while True:
