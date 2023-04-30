@@ -115,8 +115,9 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          STATE: str = chn_pin_driver.get_state()
          INT_STATE: int = lctech4chModbus.ON_OFF_TABLE[STATE]
          PIN: int = lctech4chModbus.CHNL_PINS[f"CH{(red_hash.BOARD_CHANNEL + 1)}"]
-         self.set_channel(PIN, bool(INT_STATE))
-         self.comm_port.close()
+         # self.set_channel(PIN, bool(INT_STATE))
+         lctech4chModbus.set_channel_state(self, PIN, bool(INT_STATE))
+         # self.comm_port.close()
       except Exception as e:
          print(f"e: {e}")
       finally:
@@ -295,6 +296,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
    @staticmethod
    def set_channel_state(slf, chnl: int, val: bool):
       lctech4chModbus.PORT_LOCK.acquire()
+      comm_port: commPort = None
       try:
          PIN: int = lctech4chModbus.CHNL_PINS[f"CH{chnl}"]
          print(f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {val} ]")
@@ -313,8 +315,8 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          outbuff = lctech4chModbus.crc_data(data)
          # -- -- -- -- -- -- -- --
          br, bts, sbt, par = slf.comm_args.comm_info()
-         comm_port: commPort = \
-            commPort(dev=slf.comm_args.dev, baud=int(br), bsize=int(bts), sbits=int(sbt), parity=par)
+         comm_port = commPort(dev=slf.comm_args.dev, baud=int(br)
+            , bsize=int(bts), sbits=int(sbt), parity=par)
          # -- -- -- -- -- -- -- --
          for idx in range(0, 2):
             print(f"\t-- SET TRY IDX: {idx}")
@@ -326,9 +328,16 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
                time.sleep(0.2)
                continue
          # -- -- -- -- -- -- -- --
+         if comm_port.isOpen():
+            comm_port.close()
+         # -- -- -- -- -- -- -- --
       except Exception as e:
          print(e)
       finally:
+         # -- -- -- -- -- -- -- --
+         if comm_port.isOpen():
+            comm_port.close()
+         # -- -- -- -- -- -- -- --
          lctech4chModbus.PORT_LOCK.release()
 
    def __str__(self):
