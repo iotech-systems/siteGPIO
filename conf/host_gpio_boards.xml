@@ -2,20 +2,20 @@
 <gpio>
    <host name="omms-edge-roof">
       <boards>
-         <board id="CK_ROOF" type="waveshare3chHat" args="mode:=bcm;" />
+         <board id="gpioRoof" type="waveshare3chHat" args="mode:=bcm;" />
       </boards>
    </host>
    <host name="omms-edge-p16">
-      <boards>3
-         <board id="CK_B0T_LC4r_A" type="lctech4chModbus"
+      <boards>
+         <board id="gpioP16_0" type="lctech4chModbus"
             args="dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=8;" />
-         <board id="CK_B0T_LC4r_B" type="lctech4chModbus"
+         <board id="gpioP16_1" type="lctech4chModbus"
             args="dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=4;" />
       </boards>
    </host>
    <host name="omms-edge-p7">
-      <boards>3
-         <board id="CK_A0T_LC4r" type="lctech4chModbus"
+      <boards>
+         <board id="gpioP7_0" type="lctech4chModbus"
             args="dev:=/dev/ttyUSB0;comm:=9600,8,1,N;busAddr:=8;" />
       </boards>
    </host>
