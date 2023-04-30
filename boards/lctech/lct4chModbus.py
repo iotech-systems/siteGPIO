@@ -300,7 +300,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          print(f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {val} ]")
          # -- -- -- -- -- -- -- --
          def on_rval_0(dsent: bytearray) -> bool:
-            bval: bool = (dsent == slf.comm_port.recv_buff)
+            bval: bool = (dsent == comm_port.recv_buff)
             msg: str = "\t\tSET_OK" if bval else "\t\tSET_ERROR"
             print(msg)
             return bval
