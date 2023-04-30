@@ -314,9 +314,12 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          data = slf.__set_channel_buff__(chnl, val)
          outbuff = lctech4chModbus.crc_data(data)
          # -- -- -- -- -- -- -- --
+         print(f"[ boardID: {slf.xml_id} | dev: {slf.comm_args.dev} ]")
          br, bts, sbt, par = slf.comm_args.comm_info()
          comm_port = commPort(dev=slf.comm_args.dev, baud=int(br)
             , bsize=int(bts), sbits=int(sbt), parity=par)
+         if comm_port.isOpen():
+            print(f"[ CommPortOpen: {comm_port.port } ]")
          # -- -- -- -- -- -- -- --
          for idx in range(0, 2):
             print(f"\t-- SET TRY IDX: {idx}")
@@ -337,6 +340,8 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          # -- -- -- -- -- -- -- --
          if comm_port.isOpen():
             comm_port.close()
+         else:
+            print(f"[ CommPortClosed: {comm_port.port} ]")
          # -- -- -- -- -- -- -- --
          lctech4chModbus.PORT_LOCK.release()
 
