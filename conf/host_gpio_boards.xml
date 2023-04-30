@@ -8,18 +8,24 @@
    <host name="omms-edge-p16">
       <boards>
          <board id="gpioP16_0" type="lctech4chModbus"
-            args="dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=8;" />
+            args=";dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=8;" />
          <board id="gpioP16_1" type="lctech4chModbus"
-            args="dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=4;" />
+            args=";dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=4;" />
       </boards>
    </host>
    <host name="omms-edge-p7">
       <boards>
          <board id="gpioP7_0" type="lctech4chModbus"
-            args="dev:=/dev/ttyUSB0;comm:=9600,8,1,N;busAddr:=8;" />
+            args=";dev:=/dev/ttyUSB0;comm:=9600,8,1,N;busAddr:=8;" />
       </boards>
    </host>
    <host name="3cpo">
+      <boards>
+         <board id="gpioP7_0" type="lctech4chModbus"
+            args=";dev:=/dev/ttyUSB0;comm:=9600,8,1,N;busAddr:=8;" />
+      </boards>
+   </host>
+   <host name="3cpo-x">
       <boards>
          <board id="devLab3rHat" type="waveshare3chHat" args=";mode:=bcm;" />
          <board id="devLab8r" type="waveshare8chExpBoard" args=";mode:=bcm;" />
