@@ -17,6 +17,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
    ACTIVE_STATE: int = 1
    ON_OFF_TABLE: {} = {"ON": 1, "OFF": 0}
    CHNL_PINS: {} = {"CH1": 0, "CH2": 1, "CH3": 2, "CH4": 3}
+   PORT_LOCK = threading.Lock()
 
    def __init__(self, xml_id: str
          , red: redis.Redis = None
@@ -291,6 +292,45 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       data.extend(crc)
       return data
 
+   @staticmethod
+   def set_channel_state(slf, chnl: int, val: bool):
+      lctech4chModbus.PORT_LOCK.acquire()
+      try:
+         PIN: int = lctech4chModbus.CHNL_PINS[f"CH{chnl}"]
+         print(f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {val} ]")
+         # -- -- -- -- -- -- -- --
+         def on_rval_0(dsent: bytearray) -> bool:
+            bval: bool = (dsent == slf.comm_port.recv_buff)
+            msg: str = "\t\tSET_OK" if bval else "\t\tSET_ERROR"
+            print(msg)
+            return bval
+         # -- -- -- -- -- -- -- --
+         chnl = (chnl - 1)
+         if chnl not in range(0, 4):
+            print(f"BadChnlID: {chnl}")
+            return
+         data = slf.__set_channel_buff__(chnl, val)
+         outbuff = lctech4chModbus.crc_data(data)
+         # -- -- -- -- -- -- -- --
+         br, bts, sbt, par = slf.comm_args.comm_info()
+         comm_port: commPort = \
+            commPort(dev=slf.comm_args.dev, baud=int(br), bsize=int(bts), sbits=int(sbt), parity=par)
+         # -- -- -- -- -- -- -- --
+         for idx in range(0, 2):
+            print(f"\t-- SET TRY IDX: {idx}")
+            rval: int = comm_port.send_receive(bbuff=outbuff)
+            if rval == 0 and on_rval_0(data):
+               break
+            else:
+               print(f"\tretrying set: {idx}")
+               time.sleep(0.2)
+               continue
+         # -- -- -- -- -- -- -- --
+      except Exception as e:
+         print(e)
+      finally:
+         lctech4chModbus.PORT_LOCK.release()
+
    def __str__(self):
       return "lctech4chModbus ver. 001"
 
@@ -314,7 +354,8 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             # -- -- -- --
             STATE: str = chn_pin_driver.get_state()
             NEW_INT_STATE: int = self.ON_OFF_TABLE[STATE]
-            self.set_channel(int(chn_id), bool(NEW_INT_STATE))
+            # self.set_channel(int(chn_id), bool(NEW_INT_STATE))
+            lctech4chModbus.set_channel_state(self, int(chn_id), bool(NEW_INT_STATE))
             # -- -- -- --
          except Exception as e:
             print(e)

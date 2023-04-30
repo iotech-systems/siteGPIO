@@ -7,8 +7,10 @@
    </host>
    <host name="omms-edge-p16">
       <boards>
+         <!-- lights outside -->
          <board id="gpioP16_0" type="lctech4chModbus"
             args=";dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=8;" />
+         <!-- stairway B -->
          <board id="gpioP16_1" type="lctech4chModbus"
             args=";dev:=/run/iotech/dev/modbusPortC;comm:=9600,8,1,N;busAddr:=4;" />
       </boards>
@@ -21,8 +23,14 @@
    </host>
    <host name="3cpo">
       <boards>
-         <board id="gpioP7_0" type="lctech4chModbus"
+         <!-- <board id="gpioP7_0" type="lctech4chModbus"
+            args=";dev:=/dev/ttyUSB0;comm:=9600,8,1,N;busAddr:=8;" /> -->
+         <!-- lights outside -->
+         <board id="gpioP16_0" type="lctech4chModbus"
             args=";dev:=/dev/ttyUSB0;comm:=9600,8,1,N;busAddr:=8;" />
+         <!-- stairway B -->
+         <board id="gpioP16_1" type="lctech4chModbus"
+            args=";dev:=/dev/ttyUSB0;comm:=9600,8,1,N;busAddr:=4;" />
       </boards>
    </host>
    <host name="3cpo-x">
