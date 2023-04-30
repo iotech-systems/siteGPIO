@@ -61,6 +61,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             , "REDIS_TRIGGER_PATT": redis_patt, "DTS": dts})
          # -- -- -- -- -- -- -- --
          redis_patt: str = f"{self.board_id}*"
+         print(f"RedisSubscribingTo: {redis_patt}")
          self.red_sub.psubscribe(**{redis_patt: self.redhook_on_msg})
          self.red_sbu_thread: threading.Thread = \
             self.red_sub.run_in_thread(sleep_time=0.01)
