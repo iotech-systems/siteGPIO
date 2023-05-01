@@ -322,7 +322,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             print([err, msg_dev])
             if err != 0:
                return
-            _self.comm_port.dev = msg_dev
+            _self.comm_args.dev = msg_dev
          # -- -- -- -- -- -- -- --
          comm_port = commPort(dev=_self.comm_args.dev, baud=int(br)
             , bsize=int(bts), sbits=int(sbt), parity=par)
