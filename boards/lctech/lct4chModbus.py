@@ -47,10 +47,14 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       try:
          # -- -- -- -- -- -- -- --
          if not os.path.exists(self.comm_args.dev):
-            raise FileNotFoundError(self.comm_args.dev)
+            lctech4chModbus.try_update_dev(self)
+         if not os.path.exists(self.comm_args.dev):
+            raise Exception(f"UnableToFindDev: {self.comm_args.dev}")
          # -- -- -- -- -- -- -- --
          if not self.red.ping():
             raise Exception("NoRedPong")
+         else:
+            print(f"\n\t[ GOOD_RED_PONG ]\n")
          # -- -- -- -- -- -- -- --
          hn: str = os.uname()[1]
          ip: str = utils.lan_ip()
@@ -317,12 +321,13 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          # -- -- -- -- -- -- -- --
          print(f"[ boardID: {_self.xml_id} | dev: {_self.comm_args.dev} ]")
          br, bts, sbt, par = _self.comm_args.comm_info()
-         if _self.comm_args.dev == "auto":
-            err, msg_dev = lctech4chModbus.get_comm_dev(mb_adr=_self.comm_args.bus_adr, bdr=br, par=par)
-            print([err, msg_dev])
-            if err != 0:
-               return
-            _self.comm_args.dev = msg_dev
+         # if _self.comm_args.dev == "auto":
+         #    err, msg_dev = lctech4chModbus.get_comm_dev(mb_adr=_self.comm_args.bus_adr, bdr=br, par=par)
+         #    print([err, msg_dev])
+         #    if err != 0:
+         #       return
+         #    _self.comm_args.dev = msg_dev
+         lctech4chModbus.try_update_dev(_self)
          # -- -- -- -- -- -- -- --
          comm_port = commPort(dev=_self.comm_args.dev, baud=int(br)
             , bsize=int(bts), sbits=int(sbt), parity=par)
@@ -395,6 +400,17 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       # -- end --
       print(msg)
       return rval
+
+   @staticmethod
+   def try_update_dev(_self):
+      print(f"[ boardID: {_self.xml_id} | dev: {_self.comm_args.dev} ]")
+      br, bts, sbt, par = _self.comm_args.comm_info()
+      if _self.comm_args.dev == "auto":
+         err, msg_dev = lctech4chModbus.get_comm_dev(mb_adr=_self.comm_args.bus_adr, bdr=br, par=par)
+         print([err, msg_dev])
+         if err != 0:
+            return
+         _self.comm_args.dev = msg_dev
 
    def __str__(self):
       return "lctech4chModbus ver. 001"
