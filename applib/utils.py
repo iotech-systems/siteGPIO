@@ -3,6 +3,7 @@ import datetime, calendar as cal
 import socket
 import os, time, re
 import serial, typing as t
+from serial.tools import list_ports
 
 
 class utils(object):
@@ -14,6 +15,11 @@ class utils(object):
 
    def __init__(self):
       pass
+
+   @staticmethod
+   def usbPorts():
+      ports = list_ports.comports()
+      return [p for p in ports if ("USB" in p.name.upper())]
 
    @staticmethod
    def lan_ip():

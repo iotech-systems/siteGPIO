@@ -1,4 +1,5 @@
 
+import serial
 from crcmod.predefined import *
 import os, threading, time, redis
 from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
@@ -294,7 +295,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       return data
 
    @staticmethod
-   def set_channel_state(slf, chnl: int, val: bool):
+   def set_channel_state(_self, chnl: int, val: bool):
       lctech4chModbus.PORT_LOCK.acquire()
       comm_port: commPort = None
       try:
@@ -311,12 +312,19 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          if chnl not in range(0, 4):
             print(f"BadChnlID: {chnl}")
             return
-         data = slf.__set_channel_buff__(chnl, val)
+         data = _self.__set_channel_buff__(chnl, val)
          outbuff = lctech4chModbus.crc_data(data)
          # -- -- -- -- -- -- -- --
-         print(f"[ boardID: {slf.xml_id} | dev: {slf.comm_args.dev} ]")
-         br, bts, sbt, par = slf.comm_args.comm_info()
-         comm_port = commPort(dev=slf.comm_args.dev, baud=int(br)
+         print(f"[ boardID: {_self.xml_id} | dev: {_self.comm_args.dev} ]")
+         br, bts, sbt, par = _self.comm_args.comm_info()
+         if _self.comm_args.dev == "auto":
+            err, msg_dev = lctech4chModbus.get_comm_dev(mb_adr=_self.comm_args.bus_adr, bdr=br, par=par)
+            print([err, msg_dev])
+            if err != 0:
+               return
+            _self.comm_port.dev = msg_dev
+         # -- -- -- -- -- -- -- --
+         comm_port = commPort(dev=_self.comm_args.dev, baud=int(br)
             , bsize=int(bts), sbits=int(sbt), parity=par)
          if comm_port.isOpen():
             print(f"[ CommPortOpen: {comm_port.port } ]")
@@ -338,12 +346,55 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          print(e)
       finally:
          # -- -- -- -- -- -- -- --
-         if comm_port.isOpen():
+         if comm_port is not None and comm_port.isOpen():
             comm_port.close()
-         else:
+         if comm_port is not None:
             print(f"[ CommPortClosed: {comm_port.port} ]")
          # -- -- -- -- -- -- -- --
          lctech4chModbus.PORT_LOCK.release()
+
+   @staticmethod
+   def get_comm_dev(mb_adr: int, bdr: int, par: str) -> (int, str):
+      # -- auto detect com port --
+      print("[ get_comm_dev ]")
+      ports = utils.usbPorts()
+      for port in ports:
+         try:
+            print(f"TestingPortName: {port.name}")
+            ser = serial.Serial(port.device, baudrate=bdr, parity=par)
+            if lctech4chModbus.__ping(ser, mb_adr):
+               print(f"\n\t[ MB_ADDRESS: {mb_adr} | ON: {port.device} ]\n")
+               return 0, ser.port
+            else:
+               continue
+         except Exception as e:
+            print(e)
+            return 2, "Error"
+      # -- -- -- --
+      return 1, "NotFound"
+
+   @staticmethod
+   def __ping(ser: serial.Serial, modbus_adr) -> (int, str):
+      data: [] = [0xff, 0x03, 0x03, 0xe8, 0x00, 0x01]
+      data[0] = modbus_adr
+      outbuff = lctech4chModbus.crc_data(bytearray(data))
+      ser.write(outbuff)
+      ser.flush()
+      time.sleep(0.02)
+      ser.timeout = modbusBoard.readDelay
+      resp: bytearray = bytearray()
+      while True:
+         resp.extend(ser.read(1))
+         if ser.in_waiting == 0:
+            break
+      bdr_code = lctech4chModbus.BAUDRATES[ser.baudrate]
+      if (len(resp) > 6) and (resp[4] == bdr_code):
+         rval, msg = True, f"GOOD_PONG ON: {ser.port}"
+      else:
+         rval, msg = False, "BAD_PONG"
+      # -- end --
+      print(msg)
+      return rval
 
    def __str__(self):
       return "lctech4chModbus ver. 001"
