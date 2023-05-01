@@ -18,7 +18,7 @@
    <host name="omms-edge-p7">
       <boards>
          <board id="gpioP7_0" type="lctech4chModbus"
-            args=";dev:=/dev/ttyUSB0;comm:=9600,8,1,N;busAddr:=8;" />
+            args=";dev:=auto;comm:=9600,8,1,N;busAddr:=8;" />
       </boards>
    </host>
    <host name="3cpo">
