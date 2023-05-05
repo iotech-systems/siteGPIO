@@ -93,7 +93,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          if pmsg.chnl == f"{self.board_id}_GPIO_CONF_CHANGE":
             l0 = f"| redhook_on_msg: {pmsg.chnl} |"
             l1 = f"| {pmsg} |"
-            frm = int((len(l1) / 2)) * "-"
+            frm = len(l1) * "-"
             print(f"\n\n\t[ {frm} ]")
             print(f"\t{l0}\n\t{l1}")
             print(f"\t[ {frm} ]\n\n")
