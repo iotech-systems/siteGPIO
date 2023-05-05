@@ -123,9 +123,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          STATE: str = chn_pin_driver.get_state()
          INT_STATE: int = lctech4chModbus.ON_OFF_TABLE[STATE]
          PIN: int = lctech4chModbus.CHNL_PINS[f"CH{(red_hash.BOARD_CHANNEL + 1)}"]
-         # self.set_channel(PIN, bool(INT_STATE))
          lctech4chModbus.set_channel_state(self, PIN, bool(INT_STATE))
-         # self.comm_port.close()
       except Exception as e:
          print(f"e: {e}")
       finally:
@@ -335,7 +333,8 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             rval: int = comm_port.send_receive(bbuff=outbuff)
             if rval == 0 and on_rval_0(data):
                # -- --
-               d: {} = {"LAST_STATE": int(val)
+               ST = f"ON:{val}" if val == lctech4chModbus.ACTIVE_STATE else f"OFF:{val}"
+               d: {} = {"LAST_STATE": ST
                   , "LAST_STATE_READ_DTS": utils.dts_utc(with_tz=True)}
                # -- --
                RED_PIN_KEY: str = utils.pin_redis_key(_self.board_id, str(chnl))
