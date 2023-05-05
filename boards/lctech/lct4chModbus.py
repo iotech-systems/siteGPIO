@@ -333,14 +333,14 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             rval: int = comm_port.send_receive(bbuff=outbuff)
             if rval == 0 and on_rval_0(data):
                # -- --
-               ST = f"ON:{val}" if val == lctech4chModbus.ACTIVE_STATE else f"OFF:{val}"
+               int_val = int(val)
+               ST = f"ON:{int_val}" if int_val == lctech4chModbus.ACTIVE_STATE else f"OFF:{int_val}"
                d: {} = {"LAST_STATE": ST
                   , "LAST_STATE_READ_DTS": utils.dts_utc(with_tz=True)}
                # -- --
                RED_PIN_KEY: str = utils.pin_redis_key(_self.board_id, str(chnl))
                _self.red.select(redisDBIdx.DB_IDX_GPIO.value)
                rv = _self.red.hset(RED_PIN_KEY, mapping=d)
-               pass
             else:
                print(f"\tretrying set: {idx}")
                time.sleep(0.2)
