@@ -91,7 +91,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       try:
          pmsg: redisPMsg = redisPMsg(msg)
          if pmsg.chnl == f"{self.board_id}_GPIO_CONF_CHANGE":
-            print(f"\n\t[ redhook_on_msg: {pmsg.chnl} ]")
+            print(f"\n\n\t[ redhook_on_msg: {pmsg.chnl} ]\n{pmsg}\n")
             self.redhook_process_msg(pmsg)
          else:
             pass
@@ -103,8 +103,6 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          create serial port only when the msgs comes in
       """
       try:
-         # -- -- -- --
-         print(redMsg)
          # -- load red hash --
          self.red.select(redisDBIdx.DB_IDX_GPIO.value)
          CHNL_PIN_KEY = redMsg.data.strip()
