@@ -333,7 +333,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             rval: int = comm_port.send_receive(bbuff=outbuff)
             if rval == 0 and on_rval_0(data):
                # -- --
-               int_val = int(val)
+               int_val = 1 if val else 0
                ST = f"ON:{int_val}" if int_val == lctech4chModbus.ACTIVE_STATE else f"OFF:{int_val}"
                d: {} = {"LAST_STATE": ST
                   , "LAST_STATE_READ_DTS": utils.dts_utc(with_tz=True)}
