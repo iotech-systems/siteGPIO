@@ -91,9 +91,11 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       try:
          pmsg: redisPMsg = redisPMsg(msg)
          if pmsg.chnl == f"{self.board_id}_GPIO_CONF_CHANGE":
-            print(f"\n\n\t[ -------------------------------------------------------------------------- ]")
-            print(f"\t| redhook_on_msg: {pmsg.chnl} |\n\t| {pmsg} |n")
-            print(f"\t[ -------------------------------------------------------------------------- ]\n\n")
+            bdy = f"| redhook_on_msg: {pmsg.chnl} |\n\t| {pmsg} |"
+            frm = len(bdy) * "-"
+            print(f"\n\n\t[ {frm} ]")
+            print(f"\t{bdy}")
+            print(f"\t[ {frm} ]\n\n")
             self.redhook_process_msg(pmsg)
          else:
             pass
