@@ -311,8 +311,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          # -- -- -- -- -- -- -- --
          def on_rval_0(dsent: bytearray) -> bool:
             bval: bool = (dsent == comm_port.recv_buff)
-            msg: str = "\t\tSET_OK" if bval else "\t\tSET_ERROR"
-            print(msg)
+            print("\t\tSET_OK" if bval else "\t\tSET_ERROR")
             return bval
          # -- -- -- -- -- -- -- --
          chnl = (chnl - 1)
@@ -324,12 +323,6 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          # -- -- -- -- -- -- -- --
          print(f"[ boardID: {_self.xml_id} | dev: {_self.comm_args.dev} ]")
          br, bts, sbt, par = _self.comm_args.comm_info()
-         # if _self.comm_args.dev == "auto":
-         #    err, msg_dev = lctech4chModbus.get_comm_dev(mb_adr=_self.comm_args.bus_adr, bdr=br, par=par)
-         #    print([err, msg_dev])
-         #    if err != 0:
-         #       return
-         #    _self.comm_args.dev = msg_dev
          lctech4chModbus.try_update_dev(_self)
          # -- -- -- -- -- -- -- --
          comm_port = commPort(dev=_self.comm_args.dev, baud=int(br)
@@ -341,7 +334,14 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             print(f"\t-- SET TRY IDX: {idx}")
             rval: int = comm_port.send_receive(bbuff=outbuff)
             if rval == 0 and on_rval_0(data):
-               break
+               # -- --
+               d: {} = {"LAST_STATE": int(val)
+                  , "LAST_STATE_READ_DTS": utils.dts_utc(with_tz=True)}
+               # -- --
+               RED_PIN_KEY: str = utils.pin_redis_key(_self.board_id, str(chnl))
+               _self.red.select(redisDBIdx.DB_IDX_GPIO.value)
+               rv = _self.red.hset(RED_PIN_KEY, mapping=d)
+               pass
             else:
                print(f"\tretrying set: {idx}")
                time.sleep(0.2)
@@ -428,7 +428,6 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       def _on_each(pk):
          try:
             chn_id: str = pk.replace("CH", "")
-            # PIN: int = lctech4chModbus.CHNL_PINS[pk]
             RED_PIN_KEY: str = utils.pin_redis_key(self.board_id, chn_id)
             self.red.select(redisDBIdx.DB_IDX_GPIO.value)
             _hash = self.red.hgetall(RED_PIN_KEY)
@@ -438,7 +437,6 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             # -- -- -- --
             STATE: str = chn_pin_driver.get_state()
             NEW_INT_STATE: int = self.ON_OFF_TABLE[STATE]
-            # self.set_channel(int(chn_id), bool(NEW_INT_STATE))
             lctech4chModbus.set_channel_state(self, int(chn_id), bool(NEW_INT_STATE))
             # -- -- -- --
          except Exception as e:
