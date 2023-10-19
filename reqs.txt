@@ -3,3 +3,4 @@ crcmod==1.7
 pyserial==3.5
 pytz==2019.3
 redis==4.3.4
+setproctitle
