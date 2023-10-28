@@ -77,7 +77,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             self.red_sbu_thread.start()
          return True
       except FileNotFoundError as e:
-         # -- ttydev not found --
+         # -- ttydev not foundx --
          print(e)
          return False
       except Exception as e:
