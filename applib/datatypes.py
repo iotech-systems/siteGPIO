@@ -44,7 +44,7 @@ class redisChnlPinHash(object):
       self.__conf__()
 
    def __str__(self):
-      return self._hash
+      return json.dumps(self._hash)
 
    def __conf__(self):
       # -- -- -- --
