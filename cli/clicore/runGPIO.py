@@ -1,9 +1,9 @@
 
 import os
-from applib.datatypes import commArgs
+# from applib.datatypes import commArgs
 from boards.lctech.lct4chModbus import lctech4chModbus
-from boards.waveshare.wsh3chHat import waveshare3chHat
-from boards.waveshare.wsh8chExpBoard import waveshare8chExpBoard
+# from boards.waveshare.wsh3chHat import waveshare3chHat
+# from boards.waveshare.wsh8chExpBoard import waveshare8chExpBoard
 
 
 class runGPIO(object):
@@ -76,14 +76,14 @@ class runGPIO(object):
       board: lctech4chModbus = lctech4chModbus(xml_id="CLI", args=args)
       board.set_bus_address(old_mb_adr, new_adr)
 
-   def __init_wsh3r__(self):
-      print("__init_wsh3r__")
-
-   def __set_wsh3r__(self):
-      pass
-
-   def __init_wsh8r__(self):
-      print("__init_wsh8r__")
-
-   def __set_wsh8r__(self):
-      pass
+   # def __init_wsh3r__(self):
+   #    print("__init_wsh3r__")
+   #
+   # def __set_wsh3r__(self):
+   #    pass
+   #
+   # def __init_wsh8r__(self):
+   #    print("__init_wsh8r__")
+   #
+   # def __set_wsh8r__(self):
+   #    pass

@@ -4,9 +4,9 @@ import xml.etree.ElementTree as _et
 import redis, configparser as _cp
 from applib.sunclock import sunClock
 # -- import system gpio boards --
-from boards.waveshare.wsh3chHat  import waveshare3chHat
-from boards.waveshare.wsh8chExpBoard import waveshare8chExpBoard
 from boards.lctech.lct4chModbus import lctech4chModbus
+from boards.waveshare.wsh3chHat import waveshare3chHat
+from boards.waveshare.wsh8chExpBoard import waveshare8chExpBoard
 
 
 class boardManager(object):

@@ -108,7 +108,11 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          create serial port only when the msgs comes in
       """
       try:
-         # -- load red hash --
+         # -- -- get holidays table -- --
+         self.red.select(redisDBIdx.DB_IDX_RUNTIME.value)
+         sys_holidays: str = self.red.get("SYS_HOLIDAYS")
+         print(f"sys_holidays: {sys_holidays}")
+         # -- -- load red hash -- --
          self.red.select(redisDBIdx.DB_IDX_GPIO.value)
          CHNL_PIN_KEY = redMsg.data.strip()
          _hash = self.red.hgetall(CHNL_PIN_KEY)
@@ -303,7 +307,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
    @staticmethod
    def set_channel_state(_self, chnl: int, val: bool):
       lctech4chModbus.PORT_LOCK.acquire()
-      comm_port: commPort = None
+      comm_port: commPort = t.Any
       int_val = 1 if val is True else 0
       try:
          PIN: int = lctech4chModbus.CHNL_PINS[f"CH{chnl}"]

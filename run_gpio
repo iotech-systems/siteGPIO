@@ -19,6 +19,7 @@ print(f"\n[ START_INI_SIMLINK_FOUND: {START_INI_PATH} ]\n")
 INI: _cp.ConfigParser = _cp.ConfigParser()
 INI.read(START_INI_PATH)
 
+
 REDIS_SEC = "REDIS"
 RED_HOST: str = INI.get(REDIS_SEC, "HOST")
 RED_PORT: int = INI.getint(REDIS_SEC, "PORT")
@@ -37,9 +38,11 @@ if not os.path.exists(BOARDS_XML_FILE):
    raise FileNotFoundError(BOARDS_XML_FILE)
 XML: _et.Element = _et.parse(BOARDS_XML_FILE).getroot()
 
+
 HOSTNAME: str = os.uname()[1]
 xpath = f"host[@name=\"{HOSTNAME}\"]"
 HOST_XML: _et.Element = XML.find(xpath)
+
 
 SUN: sunClock = sunClock(ini=INI)
 print(SUN)
@@ -47,8 +50,10 @@ BOARD_MANAGER: boardManager = boardManager(ini=INI, sun=SUN, red=RED, xml=HOST_X
 if not BOARD_MANAGER.init():
    raise Exception("BoardManagerInitError")
 
+
 if not BOARD_MANAGER.start():
    raise Exception("BoardManagerStartError")
+
 
 def main():
    _mainLoop: mainLoop = mainLoop()
@@ -64,7 +69,7 @@ def main():
          print(e)
 
 
-# -- -- entry point -- --
+# -- -- -- [ entry point ] -- -- --
 if __name__ == "__main__":
    setproctitle.setproctitle("siteGPIO")
    main()

@@ -66,3 +66,6 @@ class channelPinDriver(object):
       offHH, offMM = self.red_hash.OFF.split(":")
       timeOff = f"{offHH}:{offMM}"
       return not (timeOn == timeOff)
+
+   def __is_holiday(self) -> bool:
+      return True
