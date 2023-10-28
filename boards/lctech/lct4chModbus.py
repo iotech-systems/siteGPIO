@@ -164,7 +164,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
 
    def set_channel(self, chnl: int, val: bool):
       PIN: int = lctech4chModbus.CHNL_PINS[f"CH{chnl}"]
-      _m: str = f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {val} ]"
+      _m: str = f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {val} ]\n"
       print(colored(_m, color="blue"))
       # print(f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {val} ]")
       # -- -- -- -- -- -- -- --
