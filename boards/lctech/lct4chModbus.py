@@ -1,3 +1,4 @@
+import json
 
 import serial, typing as t
 from crcmod.predefined import *
@@ -110,16 +111,17 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       try:
          # -- -- get holidays table -- --
          self.red.select(redisDBIdx.DB_IDX_RUNTIME.value)
-         sys_holidays: str = self.red.get("SYS_HOLIDAYS")
-         print(f"sys_holidays: {sys_holidays}\n")
+         tmp: str = self.red.get("SYS_HOLIDAYS")
+         print(f"sys_holidays: {tmp}\n")
+         sys_holidays: [] = json.loads(tmp)
          # -- -- load red hash -- --
          self.red.select(redisDBIdx.DB_IDX_GPIO.value)
          CHNL_PIN_KEY = redMsg.data.strip()
          _hash = self.red.hgetall(CHNL_PIN_KEY)
          red_hash: redisChnlPinHash = redisChnlPinHash(_hash)
          print(f"red_hash: {red_hash}\n")
-         chn_pin_driver: channelPinDriver =\
-            channelPinDriver(red_hash, self.sun, lctech4chModbus.ON_OFF_TABLE["ON"])
+         chn_pin_driver: channelPinDriver = channelPinDriver(red_hash, self.sun
+            , holidays=sys_holidays, active_state=lctech4chModbus.ON_OFF_TABLE["ON"])
          # -- -- -- --
          br, bts, sbt, par = self.comm_args.comm_info()
          self.comm_port: commPort =\
