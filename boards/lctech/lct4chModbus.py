@@ -1,5 +1,5 @@
 
-import serial
+import serial, typing as t
 from crcmod.predefined import *
 import os, threading, time, redis
 from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
@@ -39,9 +39,9 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       self.comm_args: commArgs = commArgs(str(self.args))
       if not self.comm_args.parseOK:
          pass
-      self.red_sbu_thread: threading.Thread = None
+      self.red_sbu_thread: threading.Thread = t.Any
       self.bus_adr: int = self.comm_args.bus_adr
-      self.comm_port: commPort = None
+      self.comm_port: commPort = t.Any
 
    def init(self):
       try:
@@ -113,11 +113,11 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          CHNL_PIN_KEY = redMsg.data.strip()
          _hash = self.red.hgetall(CHNL_PIN_KEY)
          red_hash: redisChnlPinHash = redisChnlPinHash(_hash)
-         chn_pin_driver: channelPinDriver = \
+         chn_pin_driver: channelPinDriver =\
             channelPinDriver(red_hash, self.sun, lctech4chModbus.ON_OFF_TABLE["ON"])
          # -- -- -- --
          br, bts, sbt, par = self.comm_args.comm_info()
-         self.comm_port: commPort = \
+         self.comm_port: commPort =\
             commPort(dev=self.comm_args.dev, baud=int(br), bsize=int(bts), sbits=int(sbt), parity=par)
          # -- -- -- --
          STATE: str = chn_pin_driver.get_state()
@@ -172,7 +172,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       outbuff = lctech4chModbus.crc_data(data)
       # -- -- -- -- -- -- -- --
       br, bts, sbt, par = self.comm_args.comm_info()
-      self.comm_port: commPort = \
+      self.comm_port: commPort =\
          commPort(dev=self.comm_args.dev, baud=int(br), bsize=int(bts), sbits=int(sbt), parity=par)
       # -- -- -- -- -- -- -- --
       for idx in range(0, 2):
@@ -273,7 +273,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          pass
 
    def __set_channel_buff__(self, relay: int
-         , val: bool) -> [None, bytearray]:
+         , val: int) -> [None, bytearray]:
       """
          (0xff, 0x05, 0x00, 0x00, 0xFF, 0x00)
       """
@@ -284,7 +284,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       buff.append(0x05)
       # -- relay address --
       buff.extend([0, relay])
-      if val:
+      if val == 1:
          buff.extend([0xff, 0x00])
       else:
          buff.extend([0x00, 0x00])
@@ -303,9 +303,10 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
    def set_channel_state(_self, chnl: int, val: bool):
       lctech4chModbus.PORT_LOCK.acquire()
       comm_port: commPort = None
+      int_val = 1 if val is True else 0
       try:
          PIN: int = lctech4chModbus.CHNL_PINS[f"CH{chnl}"]
-         print(f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {val} ]")
+         print(f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {int_val} ]")
          # -- -- -- -- -- -- -- --
          def on_rval_0(dsent: bytearray) -> bool:
             bval: bool = (dsent == comm_port.recv_buff)
@@ -333,7 +334,6 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             rval: int = comm_port.send_receive(bbuff=outbuff)
             if rval == 0 and on_rval_0(data):
                # -- --
-               int_val = 1 if val else 0
                ST = f"ON:{int_val}" if int_val == lctech4chModbus.ACTIVE_STATE else f"OFF:{int_val}"
                d: {} = {"LAST_STATE": ST
                   , "LAST_STATE_READ_DTS": utils.dts_utc(with_tz=True)}
