@@ -26,11 +26,13 @@ class utils(object):
       try:
          s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
          s.connect(("8.8.8.8", 80))
-         lanip = s.getsockname()[0]
+         lan_ip = s.getsockname()[0]
          s.close()
-         return lanip
+         return lan_ip
       except Exception as e:
          print(e)
+      finally:
+         pass
 
    @staticmethod
    def dts_utc(with_tz: bool = False):
