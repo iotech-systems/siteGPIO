@@ -38,8 +38,13 @@ class redisChnlPinHash(object):
       self.OVERRIDE: str = ""
       self.ON: str = ""
       self.OFF: str = ""
+      self.HOLIDAY_ON: str = ""
+      self.HOLIDAY_OFF: str = ""
       self.BOARD_CHANNEL: int = 0
       self.__conf__()
+
+   def __str__(self):
+      return self._hash
 
    def __conf__(self):
       # -- -- -- --
@@ -57,15 +62,24 @@ class redisChnlPinHash(object):
       # -- -- -- --
       key = "OVERRIDE"
       if key in self._hash.keys():
-         self.OVERRIDE = self._hash["OVERRIDE"]
+         self.OVERRIDE = self._hash[key]
       # -- -- -- --
       key = "ON"
       if key in self._hash.keys():
-         self.ON = self._hash["ON"]
+         self.ON = self._hash[key]
       # -- -- -- --
       key = "OFF"
       if key in self._hash.keys():
-         self.OFF = self._hash["OFF"]
+         self.OFF = self._hash[key]
+      # -- -- -- --
+      key = "HOLIDAY_ON"
+      if key in self._hash.keys():
+         self.HOLIDAY_ON = self._hash[key]
+      # -- -- -- --
+      key = "HOLIDAY_OFF"
+      if key in self._hash.keys():
+         self.HOLIDAY_OFF = self._hash[key]
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - -
 #

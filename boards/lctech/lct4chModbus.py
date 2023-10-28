@@ -113,6 +113,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          CHNL_PIN_KEY = redMsg.data.strip()
          _hash = self.red.hgetall(CHNL_PIN_KEY)
          red_hash: redisChnlPinHash = redisChnlPinHash(_hash)
+         print(f"red_hash: {red_hash}")
          chn_pin_driver: channelPinDriver =\
             channelPinDriver(red_hash, self.sun, lctech4chModbus.ON_OFF_TABLE["ON"])
          # -- -- -- --
