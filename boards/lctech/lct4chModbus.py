@@ -111,13 +111,13 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          # -- -- get holidays table -- --
          self.red.select(redisDBIdx.DB_IDX_RUNTIME.value)
          sys_holidays: str = self.red.get("SYS_HOLIDAYS")
-         print(f"sys_holidays: {sys_holidays}")
+         print(f"sys_holidays: {sys_holidays}\n")
          # -- -- load red hash -- --
          self.red.select(redisDBIdx.DB_IDX_GPIO.value)
          CHNL_PIN_KEY = redMsg.data.strip()
          _hash = self.red.hgetall(CHNL_PIN_KEY)
          red_hash: redisChnlPinHash = redisChnlPinHash(_hash)
-         print(f"red_hash: {red_hash}")
+         print(f"red_hash: {red_hash}\n")
          chn_pin_driver: channelPinDriver =\
             channelPinDriver(red_hash, self.sun, lctech4chModbus.ON_OFF_TABLE["ON"])
          # -- -- -- --
