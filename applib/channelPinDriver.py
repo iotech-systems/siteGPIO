@@ -47,12 +47,17 @@ class channelPinDriver(object):
       _off = "OFF"; _on = "ON"
       _none: [] = [None, "", "NIL"]
       # -- -- -- --
+      is_holiday: bool = self.__is_holiday
       onHH, onMM = self.red_hash.ON.split(":")
+      if is_holiday:
+         onHH, onMM = self.red_hash.HOLIDAY_ON.split(":")
       timeOn = f"{onHH}:{onMM}"
       if sunClock.is_sun_format(onHH):
          timeOn = self.sun.get_time(onHH, int(onMM))
       # -- -- -- --
       offHH, offMM = self.red_hash.OFF.split(":")
+      if is_holiday:
+         offHH, offMM = self.red_hash.HOLIDAY_OFF.split(":")
       timeOff = f"{offHH}:{offMM}"
       if sunClock.is_sun_format(offHH):
          timeOff = self.sun.get_time(offHH, int(offMM))
@@ -71,14 +76,19 @@ class channelPinDriver(object):
       # -- --
       return not (timeOn == timeOff)
 
-   def __is_holiday__(self) -> bool:
+   @property
+   def __is_holiday(self) -> bool:
       _today = dt.datetime.today()
-      if _today.isoweekday() in range(1, 6):
+      _isoweekday: int = _today.isoweekday()
+      if _isoweekday in range(1, 6):
+         print(f"[ __is_holiday: isoweekday/ {_isoweekday} ]")
          return True
       # -- --
       month, day = _today.month, _today.day
       if self.holidays is None or len(self.holidays) == 0:
+         print(f"[ __is_holiday: None ]")
          return False
       # -- --
       arr: [] = [d for d in self.holidays if int(d.m) == month and int(d.d) == day]
+      print(f"arr: {arr}")
       return len(arr) > 0
