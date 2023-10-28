@@ -166,7 +166,6 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       PIN: int = lctech4chModbus.CHNL_PINS[f"CH{chnl}"]
       _m: str = f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {val} ]\n"
       print(colored(_m, color="blue"))
-      # print(f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {val} ]")
       # -- -- -- -- -- -- -- --
       def on_rval_0(dsent: bytearray) -> bool:
          bval: bool = (dsent == self.comm_port.recv_buff)
@@ -295,7 +294,9 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       int_val = 1 if val is True else 0
       try:
          PIN: int = lctech4chModbus.CHNL_PINS[f"CH{chnl}"]
-         print(f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {int_val} ]")
+         # print(f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {int_val} ]")
+         _m: str = f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {int_val} ]\n"
+         print(colored(_m, color="blue"))
          # -- -- -- -- -- -- -- --
          def on_rval_0(dsent: bytearray) -> bool:
             bval: bool = (dsent == comm_port.recv_buff)
