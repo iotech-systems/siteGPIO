@@ -80,6 +80,7 @@ class channelPinDriver(object):
    def __is_holiday(self) -> bool:
       _today = dt.datetime.today()
       _isoweekday: int = _today.isoweekday()
+      print(f"[ _isoweekday: {_isoweekday} ]")
       if _isoweekday in range(1, 6):
          print(f"[ __is_holiday: isoweekday/ {_isoweekday} ]")
          return True
