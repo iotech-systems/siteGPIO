@@ -1,9 +1,8 @@
 
-import json
 import serial, typing as t
 from termcolor import colored
 from crcmod.predefined import *
-import os, threading, time, redis
+import os, threading, time, redis, json
 from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
 from applib.interfaces.redisHook import redisHook
 from applib.interfaces.modbusBoard import modbusBoard
@@ -294,7 +293,6 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       int_val = 1 if val is True else 0
       try:
          PIN: int = lctech4chModbus.CHNL_PINS[f"CH{chnl}"]
-         # print(f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {int_val} ]")
          _m: str = f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {int_val} ]\n"
          print(colored(_m, color="blue"))
          # -- -- -- -- -- -- -- --
@@ -390,7 +388,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       else:
          rval, msg = False, "BAD_PONG"
       # -- end --
-      print(msg)
+      # print(msg)
       return rval
 
    @staticmethod

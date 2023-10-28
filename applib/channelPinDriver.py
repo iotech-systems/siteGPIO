@@ -1,5 +1,5 @@
 
-# import calendar as cal
+import calendar as cal
 import datetime as dt
 from applib.clock import clock
 from applib.sunclock import sunClock
@@ -80,9 +80,9 @@ class channelPinDriver(object):
    def __is_holiday(self) -> bool:
       _today = dt.datetime.today()
       _isoweekday: int = _today.isoweekday()
-      print(f"[ _isoweekday: {_isoweekday} ]")
-      if _isoweekday in range(1, 6):
-         print(f"[ __is_holiday: isoweekday/ {_isoweekday} ]")
+      dname: str = cal.day_name[_isoweekday]
+      print(f"[ __is_holiday: isoweekday/ {dname} ]")
+      if _isoweekday in [6, 7]:
          return True
       # -- --
       month, day = _today.month, _today.day
