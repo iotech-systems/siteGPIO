@@ -80,9 +80,10 @@ class channelPinDriver(object):
    def __is_holiday(self) -> bool:
       _today = dt.datetime.today()
       _isoweekday: int = _today.isoweekday()
-      dname: str = cal.day_name[_isoweekday]
+      dname: str = cal.day_name[(_isoweekday - 1)]
       print(f"[ __is_holiday: isoweekday/ {dname} ]")
       if _isoweekday in [6, 7]:
+         print("[ TheWeekend! ]")
          return True
       # -- --
       month, day = _today.month, _today.day
