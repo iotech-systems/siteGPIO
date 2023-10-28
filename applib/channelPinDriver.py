@@ -89,6 +89,6 @@ class channelPinDriver(object):
          print(f"[ __is_holiday: None ]")
          return False
       # -- --
-      arr: [] = [d for d in self.holidays if int(d.m) == month and int(d.d) == day]
+      arr: [] = [d for d in self.holidays if int(d["m"]) == month and int(d["d"]) == day]
       print(f"arr: {arr}")
       return len(arr) > 0
