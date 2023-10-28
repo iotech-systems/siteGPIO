@@ -1,6 +1,7 @@
-import json
 
+import json
 import serial, typing as t
+from termcolor import colored
 from crcmod.predefined import *
 import os, threading, time, redis
 from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
@@ -8,9 +9,9 @@ from applib.interfaces.redisHook import redisHook
 from applib.interfaces.modbusBoard import modbusBoard
 from applib.channelPinDriver import channelPinDriver
 from applib.sunclock import sunClock
-from applib.utils import utils
 from applib.datatypes import commArgs
 from applib.commPort import commPort
+from applib.utils import utils
 
 
 class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
@@ -163,7 +164,9 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
 
    def set_channel(self, chnl: int, val: bool):
       PIN: int = lctech4chModbus.CHNL_PINS[f"CH{chnl}"]
-      print(f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {val} ]")
+      _m: str = f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {val} ]"
+      print(colored(_m, color="blue"))
+      # print(f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {val} ]")
       # -- -- -- -- -- -- -- --
       def on_rval_0(dsent: bytearray) -> bool:
          bval: bool = (dsent == self.comm_port.recv_buff)
@@ -192,27 +195,6 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             time.sleep(0.2)
             continue
       # -- -- -- -- -- -- -- --
-
-   # def set_all_channels(self, val: bool):
-   #    """
-   #       5, turn on all relay
-   #       send :FF 0F 00 00 00 08 01 FF 30 1D
-   #       return :FF 0F 00 00 00 08 41 D3
-   #       6,turn off all relay
-   #       send:FF 0F 00 00 00 08 01 00 70 5D
-   #       return :FF 0F 00 00 00 08 41 D3
-   #    """
-   #    if val:
-   #       data: [] = [0x00, 0x0f, 0x00, 0x00, 0x00, 0x08, 0x01, 0xff]
-   #       data[0] = self.modbus_adr
-   #       outbuff = lctech4chModbus.crc_data(bytearray(data))
-   #    else:
-   #       data: [] = [0x00, 0x0f, 0x00, 0x00, 0x00, 0x08, 0x01, 0x00]
-   #       data[0] = self.modbus_adr
-   #       outbuff = lctech4chModbus.crc_data(bytearray(data))
-   #    # -- send & recv --
-   #    super().__send__(outbuff)
-   #    resp: bytearray = super().__read__()
 
    def read_channel(self, chnl: int) -> int:
       return 1
