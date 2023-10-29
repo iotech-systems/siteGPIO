@@ -419,8 +419,8 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             self.red.select(redisDBIdx.DB_IDX_GPIO.value)
             _hash = self.red.hgetall(RED_PIN_KEY)
             red_hash: redisChnlPinHash = redisChnlPinHash(_hash)
-            chn_pin_driver: channelPinDriver = \
-               channelPinDriver(red_hash, self.sun, self.ON_OFF_TABLE["ON"])
+            chn_pin_driver: channelPinDriver =\
+               channelPinDriver(red_hash, self.sun, holidays=[], active_state=self.ON_OFF_TABLE["ON"])
             # -- -- -- --
             STATE: str = chn_pin_driver.get_state()
             NEW_INT_STATE: int = self.ON_OFF_TABLE[STATE]
