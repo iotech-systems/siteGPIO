@@ -1,7 +1,10 @@
 
 import calendar as cal
 import datetime as dt
+# -- -- -- --
+from applib.utils import utils
 from applib.clock import clock
+from applib.datatypes import *
 from applib.sunclock import sunClock
 from applib.datatypes import redisChnlPinHash
 
@@ -83,7 +86,8 @@ class channelPinDriver(object):
       dname: str = cal.day_name[(_isoweekday - 1)]
       print(f"[ __is_holiday: isoweekday/ {dname} ]")
       if _isoweekday in [6, 7]:
-         print("[ TheWeekend! ]")
+         _m = "[ TheWeekend! ]"
+         utils.printf(_m, tcCOLORS.dark_grey)
          return True
       # -- --
       month, day = _today.month, _today.day
