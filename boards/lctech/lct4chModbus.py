@@ -411,9 +411,10 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
    def run(self) -> None:
       self.__runtime_thread__()
 
-   def __refresh_channel__(self):
+   def __refresh_channel(self):
       def _on_each(pk):
          try:
+            _m: str = f"[ {utils.dts_utc()} | __refresh_channel ]"
             chn_id: str = pk.replace("CH", "")
             RED_PIN_KEY: str = utils.pin_redis_key(self.board_id, chn_id)
             self.red.select(redisDBIdx.DB_IDX_GPIO.value)
@@ -428,7 +429,8 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             # -- -- -- --
          except Exception as e:
             print(e)
-         # -- -- -- --
+      # -- -- -- --
+      # -- on each pin/channel --
       for _pk in lctech4chModbus.CHNL_PINS.keys():
          _on_each(_pk)
 
@@ -440,7 +442,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          try:
             time.sleep(4.0)
             if cnt % 4 == 0:
-               self.__refresh_channel__()
+               self.__refresh_channel()
             if cnt == 8:
                print(f"[ board_thread : {self} ]")
                self.__update_redis__()
