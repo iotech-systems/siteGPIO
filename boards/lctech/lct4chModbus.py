@@ -348,7 +348,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          if comm_port is not None and comm_port.isOpen():
             comm_port.close()
          if comm_port is not None:
-            _m: str = f"[ CommPortClosed: {comm_port.port} ]"
+            _m: str = f"CommPortClosed: {comm_port.port}"
             utils.printf(_m, col=tcCOLORS.dark_grey, with_ts=True)
          # -- -- -- -- -- -- -- --
          lctech4chModbus.PORT_LOCK.release()
