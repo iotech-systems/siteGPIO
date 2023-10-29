@@ -24,17 +24,19 @@ class commPort(serial.Serial):
       except serial.SerialException as se:
          print(se)
 
-   def send_receive(self, bbuff: bytearray) -> int:
+   def send_receive(self, bbuff: bytearray, with_print: bool = False) -> int:
       t = os.getenv("GPIO_BOARD_SERIAL_DELAY")
       POST_WRITE_DELAY: float = float(t) if (t not in [None, ""]) else 0.020
       try:
-         print(f"\tSENT: {bbuff} -> ", end="")
+         if with_print:
+            print(f"\tSENT: {bbuff} -> ", end="")
          count = self.write(bbuff)
          self.flush()
          time.sleep(POST_WRITE_DELAY)
          if count != len(bbuff):
             raise Exception("BadSendByteCount")
-         print("SENT_OK")
+         if with_print:
+            print("SENT_OK")
          if self.__receive__():
             return 0
          else:
@@ -43,7 +45,7 @@ class commPort(serial.Serial):
          self.last_exception = e
          return 21   # exception
 
-   def __receive__(self) -> bool:
+   def __receive__(self, with_print: bool = False) -> bool:
       try:
          self.recv_buff.clear()
          self.timeout = 0.200
@@ -52,7 +54,8 @@ class commPort(serial.Serial):
             if self.in_waiting == 0:
                break
          # -- -- -- --
-         print(f"\tRECV: {self.recv_buff} -> OK")
+         if with_print:
+            print(f"\tRECV: {self.recv_buff} -> OK")
          # -- -- -- --
          return True
       except Exception as e:
