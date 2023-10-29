@@ -8,7 +8,7 @@ from applib.interfaces.redisHook import redisHook
 from applib.interfaces.modbusBoard import modbusBoard
 from applib.channelPinDriver import channelPinDriver
 from applib.sunclock import sunClock
-from applib.datatypes import commArgs
+from applib.datatypes import *
 from applib.commPort import commPort
 from applib.utils import utils
 
@@ -163,8 +163,8 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
 
    def set_channel(self, chnl: int, val: bool):
       PIN: int = lctech4chModbus.CHNL_PINS[f"CH{chnl}"]
-      _m: str = f"\n\t[ set_channel: CH{chnl} - PIN {PIN} | val: {val} ]\n"
-      print(colored(_m, color="blue"))
+      _m: str = f"set_channel: CH{chnl} - PIN {PIN} | val: {val}"
+      utils.printf(_m, tcCOLORS.blue, bold=True, with_ts=True)
       # -- -- -- -- -- -- -- --
       def on_rval_0(dsent: bytearray) -> bool:
          bval: bool = (dsent == self.comm_port.recv_buff)
@@ -414,7 +414,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
    def __refresh_channel(self):
       def _on_each(pk):
          try:
-            _m: str = f"\n[ {utils.dts_utc()} | __refresh_channel ]"
+            _m: str = f"\n[ {utils.dts_local()} | __refresh_channel ]"
             print(colored(_m, color="green", attrs=["bold"]))
             chn_id: str = pk.replace("CH", "")
             RED_PIN_KEY: str = utils.pin_redis_key(self.board_id, chn_id)

@@ -1,9 +1,10 @@
 
-import datetime, calendar as cal
-import socket
-import os, time, re
 import serial, typing as t
+import datetime, calendar as cal
+import socket, os, time, re
 from serial.tools import list_ports
+from termcolor import colored
+from applib.datatypes import *
 
 
 class utils(object):
@@ -45,6 +46,13 @@ class utils(object):
    def ts_utc():
       _t = datetime.datetime.utcnow()
       return f"{_t.hour:02d}:{_t.minute:02d}:{_t.second:02d}"
+
+   @staticmethod
+   def dts_local():
+      d: datetime = datetime.datetime.now()
+      buff = f"{d.year}-{d.month:02d}-{d.day:02d}T" \
+         f"{d.hour:02d}:{d.minute:02d}:{d.second:02d}"
+      return f"{buff} UTC"
 
    @staticmethod
    def syspath(channel: str, endpoint: str):
@@ -120,3 +128,14 @@ class utils(object):
          return src.decode()
       else:
          raise Exception("type not handled: " + type(src))
+
+   @staticmethod
+   def printf(m: str, col: str, bold: bool = False
+         , with_ts: bool = True, pre: str = "", post: str = ""):
+      # -- -- -- --
+      _m: str = f"{pre}{m}{post}"
+      if with_ts:
+         _m = f"{pre}[ {utils.dts_local()} | {m} ]{post}"
+      # -- -- -- --
+      _bold = "bold" if bold else ""
+      print(colored(_m, color=col, attrs=[_bold]))
