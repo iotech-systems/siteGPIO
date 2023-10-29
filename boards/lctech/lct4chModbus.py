@@ -296,7 +296,8 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       try:
          PIN: int = lctech4chModbus.CHNL_PINS[f"CH{chnl}"]
          _m: str = f"set_channel: CH{chnl} - PIN {PIN} | val: {int_val}"
-         utils.printf(_m, col=tcCOLORS.blue, bold=True, with_ts=True)
+         _col: str = tcCOLORS.green if int_val else tcCOLORS.red
+         utils.printf(_m, col=_col, bold=True, with_ts=True)
          # -- -- -- -- -- -- -- --
          def on_rval_0(dsent: bytearray) -> bool:
             bval: bool = (dsent == comm_port.recv_buff)
@@ -318,7 +319,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
             , bsize=int(bts), sbits=int(sbt), parity=par)
          if comm_port.isOpen():
             print(f"[ CommPortOpen: {comm_port.port } ]")
-         # -- -- -- -- -- -- -- --
+         # -- -- retries -- -- --
          for idx in range(0, 2):
             print(f"\t-- SET TRY IDX: {idx}")
             rval: int = comm_port.send_receive(bbuff=outbuff)
@@ -331,6 +332,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
                RED_PIN_KEY: str = utils.pin_redis_key(_self.board_id, str(chnl))
                _self.red.select(redisDBIdx.DB_IDX_GPIO.value)
                rv = _self.red.hset(RED_PIN_KEY, mapping=d)
+               break
             else:
                print(f"\tretrying set: {idx}")
                time.sleep(0.2)
