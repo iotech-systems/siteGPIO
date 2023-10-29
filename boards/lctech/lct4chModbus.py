@@ -1,9 +1,9 @@
 
 import serial, typing as t
-from termcolor import colored
+# from termcolor import colored
 from crcmod.predefined import *
 import os, threading, time, redis, json
-from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
+# from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
 from applib.interfaces.redisHook import redisHook
 from applib.interfaces.modbusBoard import modbusBoard
 from applib.channelPinDriver import channelPinDriver
@@ -394,7 +394,6 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       else:
          rval, msg = False, "BAD_PONG"
       # -- end --
-      # print(msg)
       return rval
 
    @staticmethod
@@ -440,6 +439,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       # -- on each pin/channel --
       for _pk in lctech4chModbus.CHNL_PINS.keys():
          _on_each(_pk)
+      # -- -- -- --
 
    def __runtime_thread__(self):
       cnt: int = 0
