@@ -87,7 +87,7 @@ class channelPinDriver(object):
       print(f"[ __is_holiday: isoweekday/ {dname} ]")
       if _isoweekday in [6, 7]:
          _m = "[ TheWeekend! ]"
-         utils.printf(_m, tcCOLORS.dark_grey)
+         utils.printf(_m, col=tcCOLORS.light_grey, with_ts=True)
          return True
       # -- --
       month, day = _today.month, _today.day
