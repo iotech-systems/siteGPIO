@@ -9,6 +9,7 @@ from applib.datatypes import *
 
 class utils(object):
 
+   HOST_TZ: str = ""
    GEOLOC = ""
    BUILDING = ""
    with open("/etc/hostname") as f:
@@ -52,7 +53,14 @@ class utils(object):
       d: datetime = datetime.datetime.now()
       buff = f"{d.year}-{d.month:02d}-{d.day:02d}T" \
          f"{d.hour:02d}:{d.minute:02d}:{d.second:02d}"
-      return f"{buff} UTC"
+      return f"{buff}"
+
+   @staticmethod
+   def host_tz_info():
+      if utils.HOST_TZ in [None, ""]:
+         with open("/etc/timezone", "r") as f:
+            utils.HOST_TZ = f.read().strip()
+      return utils.HOST_TZ
 
    @staticmethod
    def syspath(channel: str, endpoint: str):
