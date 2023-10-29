@@ -2,9 +2,9 @@
 import calendar as cal
 import datetime as dt
 # -- -- -- --
+from applib.datatypes import *
 from applib.utils import utils
 from applib.clock import clock
-from applib.datatypes import *
 from applib.sunclock import sunClock
 from applib.datatypes import redisChnlPinHash
 

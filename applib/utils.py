@@ -146,4 +146,8 @@ class utils(object):
          _m = f"{pre}[ {utils.dts_local()} | {m} ]{post}"
       # -- -- -- --
       _bold = "bold" if bold else ""
-      print(colored(_m, color=col, attrs=[_bold]))
+      if _bold in [None, ""]:
+         print(colored(_m, color=col))
+      else:
+         print(colored(_m, color=col, attrs=[_bold]))
+      # -- -- -- --
