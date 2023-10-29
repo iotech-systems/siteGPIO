@@ -163,7 +163,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
 
    def set_channel(self, chnl: int, val: bool):
       PIN: int = lctech4chModbus.CHNL_PINS[f"CH{chnl}"]
-      _m: str = f"set_channel: CH{chnl} - PIN {PIN} | val: {val}"
+      _m: str = f" {utils.host_tz_info()} | set_channel: CH{chnl} - PIN {PIN} | val: {val}"
       utils.printf(_m, tcCOLORS.blue, bold=True, with_ts=True)
       # -- -- -- -- -- -- -- --
       def on_rval_0(dsent: bytearray) -> bool:
