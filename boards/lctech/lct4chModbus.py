@@ -415,7 +415,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       def _on_each(pk):
          try:
             _m: str = f"[ {utils.dts_utc()} | __refresh_channel ]"
-            print(colored(_m, color="yellow"))
+            print(colored(_m, color="yellow", attrs=["bold"]))
             chn_id: str = pk.replace("CH", "")
             RED_PIN_KEY: str = utils.pin_redis_key(self.board_id, chn_id)
             self.red.select(redisDBIdx.DB_IDX_GPIO.value)
