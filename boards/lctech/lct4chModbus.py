@@ -170,7 +170,7 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       # -- -- -- -- -- -- -- --
       def on_rval_0(dsent: bytearray) -> bool:
          bval: bool = (dsent == self.comm_port.recv_buff)
-         msg: str = "\t\tSET_OK" if bval else "\t\tSET_ERROR"
+         msg: str = "\tSET_OK" if bval else "\t\tSET_ERROR"
          print(msg)
          return bval
       # -- -- -- -- -- -- -- --
