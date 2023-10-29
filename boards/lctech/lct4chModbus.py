@@ -170,8 +170,8 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
       # -- -- -- -- -- -- -- --
       def on_rval_0(dsent: bytearray) -> bool:
          bval: bool = (dsent == self.comm_port.recv_buff)
-         _m: str = "SET_OK" if bval else "SET_ERROR"
-         utils.printf(_m, tcCOLORS.green, bold=True, with_ts=True)
+         _msg: str = "SET_OK" if bval else "SET_ERROR"
+         utils.printf(_msg, tcCOLORS.green, bold=True, with_ts=True)
          return bval
       # -- -- -- -- -- -- -- --
       chnl = (chnl - 1)
@@ -301,7 +301,8 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          # -- -- -- -- -- -- -- --
          def on_rval_0(dsent: bytearray) -> bool:
             bval: bool = (dsent == comm_port.recv_buff)
-            print("\t\tSET_OK" if bval else "\t\tSET_ERROR")
+            _mm: str = "SET_OK" if bval else "SET_ERROR"
+            utils.printf(_mm, col=tcCOLORS.green)
             return bval
          # -- -- -- -- -- -- -- --
          chnl = (chnl - 1)
