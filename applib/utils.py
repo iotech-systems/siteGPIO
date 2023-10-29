@@ -141,7 +141,7 @@ class utils(object):
    def printf(m: str, col: str, bold: bool = False
          , with_ts: bool = True, pre: str = "", post: str = ""):
       # -- -- -- --
-      _m: str = f"{pre}{m}{post}"
+      _m: str = f"[ {pre}{m}{post} ]"
       if with_ts:
          _m = f"{pre}[ {utils.dts_local()} | {m} ]{post}"
       # -- -- -- --
