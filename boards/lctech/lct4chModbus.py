@@ -318,11 +318,10 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          comm_port = commPort(dev=_self.comm_args.dev, baud=int(br)
             , bsize=int(bts), sbits=int(sbt), parity=par)
          if comm_port.isOpen():
-            _m: str = f"[ CommPortOpen: {comm_port.port } ]"
+            _m: str = f"CommPortOpen: {comm_port.port }"
             utils.printf(_m, col=tcCOLORS.dark_grey, with_ts=True)
          # -- -- retries -- -- --
          for idx in range(0, 2):
-            # print(f"\t-- SET TRY IDX: {idx}")
             rval: int = comm_port.send_receive(bbuff=outbuff)
             if rval == 0 and on_rval_0(data):
                # -- --
@@ -349,7 +348,8 @@ class lctech4chModbus(redisHook, modbusBoard, threading.Thread):
          if comm_port is not None and comm_port.isOpen():
             comm_port.close()
          if comm_port is not None:
-            print(f"[ CommPortClosed: {comm_port.port} ]")
+            _m: str = f"[ CommPortClosed: {comm_port.port} ]"
+            utils.printf(_m, col=tcCOLORS.dark_grey, with_ts=True)
          # -- -- -- -- -- -- -- --
          lctech4chModbus.PORT_LOCK.release()
 
