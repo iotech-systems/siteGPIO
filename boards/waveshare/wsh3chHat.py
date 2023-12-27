@@ -1,6 +1,6 @@
-import gc
-import time, redis
-import os, threading
+
+import threading
+import gc, os, time, redis
 from applib.utils import utils
 from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
 from applib.interfaces.redisHook import redisHook
@@ -23,6 +23,8 @@ else:
 """
 class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
 
+   VER_STR: str = "waveshare3chHat ver: 002"
+
    helpinfo = """
       [ waveshare3chHat - help ]
          ACTIVE_STATE: int = 0
@@ -33,6 +35,7 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
    ACTIVE_STATE: int = 0
    ON_OFF_TABLE: {} = {"ON": 0, "OFF": 1}
    CHNL_PINS: {} = {"C1": 26, "C2": 20, "C3": 21}
+   RED_HOOK_SLEEP: float = 0.200
 
    def __init__(self, xml_id: str
          , red: redis.Redis
@@ -84,7 +87,7 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
          return False
 
    def __str__(self):
-      return "waveshare3chHat ver: 001"
+      return waveshare3chHat.VER_STR
 
    # -- -- -- -- -- -- -- --
    # redis hook
@@ -146,20 +149,24 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
    def __create_red_eventing_thread__(self):
       self.red_sbu_thread = None
       self.red_thread_err = False
+      # -- -- -- --
       self.red_sbu_thread: threading.Thread = \
-         self.red_sub.run_in_thread(sleep_time=0.100, exception_handler=self.__on_red_exception__)
+         self.red_sub.run_in_thread(sleep_time=waveshare3chHat.RED_HOOK_SLEEP
+            , exception_handler=self.__on_red_exception__)
+      # -- -- -- --
       self.red_sbu_thread.name = self.xml_id
 
    def __on_red_exception__(self, e, pubsub, src):
       print("[ __on_red_exception__ ]")
       try:
-         self.__create_red_eventing_thread__()
          gc.collect()
+         self.__create_red_eventing_thread__()
       except Exception as e:
          print(e)
 
    def __check_red_thread__(self):
-      pass
+      if self.red_thread_err:
+         self.__create_red_eventing_thread__()
 
    def __update_redis__(self):
       upds: [] = []
