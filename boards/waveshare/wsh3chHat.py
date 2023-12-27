@@ -1,5 +1,5 @@
-import gc
-import time, redis
+
+import gc, time, redis
 import os, threading
 from applib.utils import utils
 from applib.datatypes import redisDBIdx, redisPMsg, redisChnlPinHash
