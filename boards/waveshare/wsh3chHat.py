@@ -48,6 +48,7 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
       self.red_sbu_thread: threading.Thread = None
       self.sun: sunClock = sun
       self.args = args
+      self.red_thread_exp: bool = False
 
    def init(self, GPIO_MODE: int = GPIO.BCM) -> bool:
       try:
@@ -73,7 +74,7 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
          redis_patt: str = f"{self.board_id}*"
          self.red_sub.psubscribe(**{redis_patt: self.redhook_on_msg})
          self.__create_red_eventing_thread__()
-         # # -- -- -- -- -- -- -- --
+         # -- -- -- -- -- -- -- --
          if not self.red_sbu_thread.is_alive():
             self.red_sbu_thread.start()
          # -- -- -- -- -- -- -- --
@@ -83,7 +84,7 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
          return False
 
    def __str__(self):
-      return "waveshare3chHat ver: 001"
+      return "waveshare3chHat ver: 002"
 
    # -- -- -- -- -- -- -- --
    # redis hook
@@ -95,8 +96,13 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
             self.redhook_process_msg(pmsg)
          else:
             pass
+         # -- -- -- --
+         self.red_thread_exp = False
       except Exception as e:
          print(e)
+         self.red_thread_exp = True
+      finally:
+         pass
 
    def redhook_process_msg(self, redMsg: redisPMsg):
       self.__update_chnl_pin__(redMsg)
@@ -143,22 +149,32 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
       self.__runtime_thread__()
 
    def __create_red_eventing_thread__(self):
+      SLEEP_TIME: float = 0.200
       self.red_sbu_thread = None
+      self.red_thread_exp = False
       self.red_sbu_thread: threading.Thread = \
-         self.red_sub.run_in_thread(sleep_time=0.100, exception_handler=self.__on_red_exception__)
+         self.red_sub.run_in_thread(sleep_time=SLEEP_TIME, exception_handler=self.__on_red_exception__)
       self.red_sbu_thread.name = self.xml_id
 
    def __on_red_exception__(self, e, pubsub, src):
-      print("[ __on_red_exception__ ]")
       try:
-         self.__create_red_eventing_thread__()
+         print([e, pubsub, src])
          gc.collect()
+         self.red_thread_exp = True
       except Exception as e:
          print(e)
+      finally:
+         pass
 
    def __check_red_thread__(self):
-      pass
+      if self.red_thread_exp:
+         self.__create_red_eventing_thread__()
+      else:
+         pass
 
+   """
+      sends data to redis to update board state
+   """
    def __update_redis__(self):
       upds: [] = []
       for pk in waveshare3chHat.CHNL_PINS.keys():

@@ -64,5 +64,7 @@ class boardManager(object):
             accu &= True
          except:
             accu &= False
+         finally:
+            pass
       # -- -- -- --
       return accu
