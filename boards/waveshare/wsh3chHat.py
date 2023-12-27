@@ -149,6 +149,7 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
       self.__runtime_thread__()
 
    def __create_red_eventing_thread__(self):
+      print("[ __create_red_eventing_thread__ ]")
       SLEEP_TIME: float = 0.200
       self.red_sbu_thread = None
       self.red_thread_exp = False
