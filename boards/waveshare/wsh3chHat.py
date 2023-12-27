@@ -7,7 +7,7 @@ from applib.interfaces.redisHook import redisHook
 from applib.interfaces.rpiHatBoard import rpiHatBoard
 from applib.channelPinDriver import channelPinDriver
 from applib.sunclock import sunClock
-# "armv7l": on running on RPi
+# -- "armv7l": on running on RPi --
 if os.uname()[4].startswith("armv"):
    import RPi.GPIO as GPIO
    GPIO.setwarnings(False)
@@ -48,6 +48,7 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
       self.red_sbu_thread: threading.Thread = None
       self.sun: sunClock = sun
       self.args = args
+      self.red_thread_err: bool = False
 
    def init(self, GPIO_MODE: int = GPIO.BCM) -> bool:
       try:
@@ -144,6 +145,7 @@ class waveshare3chHat(redisHook, rpiHatBoard, threading.Thread):
 
    def __create_red_eventing_thread__(self):
       self.red_sbu_thread = None
+      self.red_thread_err = False
       self.red_sbu_thread: threading.Thread = \
          self.red_sub.run_in_thread(sleep_time=0.100, exception_handler=self.__on_red_exception__)
       self.red_sbu_thread.name = self.xml_id
