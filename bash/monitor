@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 
 if [ $(pgrep -c siteGPIO) == 0  ]; then
