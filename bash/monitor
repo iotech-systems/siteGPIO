@@ -4,3 +4,5 @@
 if [ $(pgrep -c siteGPIO) == 0  ]; then
   sleep 2 && cd /opt/iotech/siteGPIO && chmod +x run_gpio && ./run_gpio >> /dev/null &
 fi
+
+
